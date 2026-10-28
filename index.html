@@ -1,0 +1,2819 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Narrator">
+<meta name="theme-color" content="#161c2e">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23161c2e'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23d4a94c' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='8' fill='%23d4a94c'/%3E%3C/svg%3E">
+<title>Table Narrator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Frank+Ruhl+Libre:wght@400;700&family=Alegreya:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one narrow column for a phone propped by the board — story scroll on top,
+   one big "show the game master" action, then the heroes and the battle tray.
+   Deliberately single dark theme: played at a dim table, it keeps glare off faces. */
+:root {
+  --night: #161c2e;
+  --night-2: #1f2740;
+  --night-3: #2b3556;
+  --line: #3a4670;
+  --ink: #e8e4d8;
+  --ink-dim: #a3a9be;
+  --gold: #d4a94c;
+  --gold-deep: #9c7a2c;
+  --gold-ink: #1a1408;
+  --blood: #c4524a;
+  --blood-soft: #e5847b;
+  --verdigris: #6aa89a;
+  --parchment: #efe3c8;
+  --parchment-ink: #3a2c1a;
+  --pip: #1d1a14;
+  --scrim: rgba(5, 8, 16, .66);
+  --err: #ff9b8f;
+  --ui: "Rubik", system-ui, -apple-system, sans-serif;
+  --tale-he: "Frank Ruhl Libre", "Times New Roman", serif;
+  --tale-ru: "Alegreya", Georgia, serif;
+  --tap: 48px;
+  --dirsign: 1;
+  color-scheme: dark;
+}
+[dir="rtl"] { --dirsign: -1; }
+
+* { box-sizing: border-box; }
+html, body { background: var(--night); color: var(--ink); margin: 0; }
+[hidden] { display: none !important; }
+body {
+  font: 400 17px/1.5 var(--ui);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 24px;
+  background: radial-gradient(120% 50% at 50% -10%, #2a3458 0%, transparent 60%), var(--night);
+  min-height: 100%;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--night); }
+main { max-width: 640px; margin: 0 auto; }
+h1, h2, h3 { font-weight: 500; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1rem; color: var(--ink-dim); margin: 18px 0 8px; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.fine { color: var(--ink-dim); font-size: .82rem; text-align: center; }
+.error { color: var(--err); min-height: 1.4em; font-size: .95rem; }
+.notice { background: rgba(212, 169, 76, .12); border: 1px solid var(--gold-deep); border-radius: 10px; padding: 10px 12px; font-size: .92rem; }
+.row { display: flex; gap: 10px; }
+.row > * { flex: 1; min-width: 0; }
+
+/* ---------- buttons ---------- */
+.btn { min-height: var(--tap); border-radius: 12px; padding: 10px 16px; border: 1px solid var(--line); background: transparent; }
+.btn.primary { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); font-weight: 700; }
+.btn.primary:disabled { background: var(--night-3); color: var(--ink-dim); border-color: var(--line); cursor: default; }
+.btn.quiet { background: var(--night-3); }
+.btn:disabled { opacity: .45; cursor: default; }
+.icon-btn { min-width: var(--tap); min-height: var(--tap); border-radius: 50%; border: 1px solid transparent; background: none;
+  color: var(--ink-dim); display: inline-grid; place-items: center; }
+.icon-btn svg { width: 22px; height: 22px; }
+.link { background: none; border: 0; text-decoration: underline; padding: 6px 0; color: inherit; }
+
+/* ---------- home ---------- */
+#screen-home { min-height: 92dvh; display: flex; flex-direction: column; justify-content: center; gap: 26px; padding-block: 24px; }
+.hero { text-align: center; display: grid; gap: 10px; justify-items: center; }
+.sigil { width: 120px; height: 120px; fill: none; stroke: var(--gold); stroke-width: 1.2; }
+.sigil .core { fill: rgba(212, 169, 76, .14); }
+.hero h1 { display: grid; gap: 2px; }
+.hero h1 [lang="he"] { font: 700 2.3rem/1.1 var(--tale-he); }
+.hero h1 [lang="ru"] { font: italic 400 1.55rem/1.2 var(--tale-ru); color: var(--ink-dim); }
+.lang-pick { display: grid; gap: 12px; }
+.lang-pick .btn { min-height: 60px; font-size: 1.12rem; background: var(--night-2); }
+.saved { display: grid; gap: 8px; }
+.saved-item { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 8px 8px 8px 14px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--night-2); }
+.saved-item .names { font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-item .when { color: var(--ink-dim); font-size: .8rem; }
+
+/* ---------- bars & forms ---------- */
+.bar { display: flex; align-items: center; gap: 2px; padding-block: 8px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: linear-gradient(var(--night) 72%, transparent); }
+.bar h2 { flex: 1; }
+.bar .spacer { flex: 1; }
+.btn-pause { min-height: 40px; border-radius: 20px; padding: 6px 16px; border: 1px solid var(--line); background: var(--night-3); font-weight: 500; }
+.btn-pause.paused { background: var(--gold); color: var(--gold-ink); }
+label { display: grid; gap: 4px; font-size: .88rem; color: var(--ink-dim); }
+input, select, textarea { font: inherit; color: var(--ink); background: var(--night-2); border: 1px solid var(--line); border-radius: 10px;
+  min-height: var(--tap); padding: 8px 12px; width: 100%; }
+textarea { resize: vertical; line-height: 1.5; }
+input[type="range"] { padding: 0; accent-color: var(--gold); }
+label.check { display: flex; align-items: center; gap: 10px; color: var(--ink); min-height: var(--tap); }
+label.check input { width: 22px; height: 22px; min-height: 0; accent-color: var(--gold); }
+.form { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 12px; padding: 14px;
+  background: var(--night-2); border: 1px solid var(--line); border-radius: 14px; }
+.wide { grid-column: 1 / -1; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.seg { border: 0; padding: 0; margin: 0; display: flex; gap: 8px; grid-column: 1 / -1; min-width: 0; }
+.seg legend { color: var(--ink-dim); font-size: .88rem; margin-bottom: 4px; padding: 0; }
+.seg label { flex: 1; display: block; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seg span { display: flex; align-items: center; justify-content: center; min-height: var(--tap); border-radius: 10px; border: 1px solid var(--line); color: var(--ink); padding: 0 8px; text-align: center; }
+.seg input:checked + span { background: var(--night-3); border-color: var(--gold); color: var(--gold); }
+.seg input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+.setup-players { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 4px; }
+.setup-players li { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 8px; padding: 8px 0 8px 4px; border-bottom: 1px solid var(--line); }
+.setup-players .stats { color: var(--ink-dim); font-size: .85rem; }
+.setup-players .icon-btn { grid-row: 1 / span 2; grid-column: 2; }
+
+/* ---------- story scroll (the one bold element) ---------- */
+.scroll { margin: 4px 0 14px; padding: 18px 20px 10px; border-radius: 4px 4px 16px 16px; background: var(--parchment); color: var(--parchment-ink);
+  box-shadow: inset 0 0 44px rgba(120, 84, 30, .28); display: grid; gap: 8px; }
+.story { margin: 0; font-size: 1.22rem; line-height: 1.6; min-height: 3.2em; }
+:lang(he) .story, :lang(he) .story-log p { font-family: var(--tale-he); font-size: 1.3rem; }
+:lang(ru) .story, :lang(ru) .story-log p { font-family: var(--tale-ru); }
+.story.fresh { animation: ink-in .7s ease-out; }
+.story.writing { opacity: .8; }
+@keyframes ink-in { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
+.rules-line { font: 400 .9rem/1.45 var(--ui); color: var(--parchment-ink); opacity: .78; border-top: 1px solid rgba(58, 44, 26, .2); padding-top: 8px; }
+.scroll-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; font-size: .9rem; }
+.scroll-actions .status { margin-inline-start: auto; opacity: .7; }
+
+/* ---------- look (camera) ---------- */
+.look { display: grid; gap: 6px; margin-bottom: 16px; }
+.look .btn.primary { min-height: 64px; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; overflow: hidden; }
+.look .btn.primary svg { width: 26px; height: 26px; }
+.look input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.look .hint { color: var(--ink-dim); font-size: .85rem; text-align: center; }
+.sheet { width: min(640px, 100vw); max-height: 88dvh; margin: auto auto 0; border: 1px solid var(--line); border-bottom: 0;
+  border-radius: 18px 18px 0 0; background: var(--night-2); color: var(--ink);
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.sheet::backdrop { background: var(--scrim); }
+.sheet .bar { background: var(--night-2); top: 0; }
+.sheet-body { display: grid; gap: 12px; }
+.photo { width: 100%; max-height: 32dvh; object-fit: contain; border-radius: 10px; background: #000; }
+.busy { display: flex; align-items: center; gap: 10px; color: var(--ink-dim); }
+.spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--gold); animation: spin .8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.seen { font-size: 1rem; }
+.card-view { background: var(--parchment); color: var(--parchment-ink); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
+.card-view .name { font-size: 1.2rem; font-weight: 700; }
+.card-view .alt { font-size: .9rem; opacity: .75; }
+.card-view .text { line-height: 1.5; white-space: pre-wrap; }
+.card-view .type { font-size: .82rem; letter-spacing: .02em; opacity: .75; }
+.card-view [lang="he"] { font-family: var(--tale-he); }
+.card-view [lang="ru"] { font-family: var(--tale-ru); }
+.choices { display: grid; gap: 8px; }
+.who { display: flex; flex-wrap: wrap; gap: 8px; }
+.who label { display: block; position: relative; }
+.who input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.who span { display: inline-flex; min-height: 40px; align-items: center; padding: 0 14px; border-radius: 20px; border: 1px solid var(--line); color: var(--ink); }
+.who input:checked + span { border-color: var(--gold); color: var(--gold); background: var(--night-3); }
+.who input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+.dice-big { display: flex; gap: 10px; flex-wrap: wrap; }
+.dice-big .face-wrap { width: 56px; height: 56px; padding: 7px; border-radius: 10px; background: var(--parchment); }
+.warn { color: var(--gold); font-size: .9rem; }
+.voice-warning { display: grid; gap: 10px; margin-bottom: 14px; }
+.places-box { border: 0; padding: 0; margin: 0 0 16px; min-width: 0; }
+.places-box legend { color: var(--ink-dim); font-size: .88rem; padding: 0; margin-bottom: 6px; }
+.places { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.places label { flex: none; }
+#btn-music.off { opacity: .45; }
+.own-music { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.own-music li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding-block: 6px; border-bottom: 1px solid var(--line); }
+.om-name { display: grid; min-width: 0; }
+.om-file { color: var(--ink-dim); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.om-pick { position: relative; overflow: hidden; min-height: 40px; padding: 6px 12px; font-size: .9rem; }
+.om-pick input { position: absolute; inset: 0; opacity: 0; font-size: 0; cursor: pointer; }
+.om-del { min-height: 40px; padding: 6px 12px; font-size: .9rem; }
+.sheet a { color: var(--gold); }
+#btn-music.off svg { stroke-dasharray: 3 2; }
+
+/* ---------- players ---------- */
+.players { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.player { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; padding: 12px 14px; background: var(--night-2); border: 1px solid var(--line); border-radius: 14px; }
+.player.active { border-color: var(--gold); }
+.player.out { opacity: .55; }
+.player.downed { border-style: dashed; }
+.p-head { display: flex; gap: 8px; align-items: baseline; min-width: 0; flex-wrap: wrap; }
+.p-name { font-size: 1.1rem; }
+.p-char { color: var(--ink-dim); font-size: .9rem; }
+.p-stats { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .92rem; }
+.stat i { font-style: normal; color: var(--ink-dim); margin-inline-end: 4px; }
+.stat.str b { color: var(--gold); }
+.stat.crf b { color: var(--verdigris); }
+.counters { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.counter { display: flex; align-items: center; gap: 6px; }
+.counter .val { min-width: 2.2ch; text-align: center; font-variant-numeric: tabular-nums; }
+.hearts { color: var(--blood); font-size: 1.15rem; letter-spacing: 1px; }
+.coins { color: var(--gold); }
+.mini { width: 34px; height: 34px; border-radius: 50%; background: none; border: 1px solid var(--line); color: var(--ink-dim); }
+.btn-battle { grid-column: 2; grid-row: 1 / span 3; align-self: center; background: var(--night-3); border-color: var(--gold-deep); color: var(--gold); font-weight: 500; }
+.village { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 76px auto; gap: 8px; align-items: center; padding-top: 8px; border-top: 1px solid var(--line); }
+.village-note { color: var(--ink-dim); font-size: .9rem; }
+.village .btn.primary { padding-inline: 12px; }
+.village .buy-n[hidden] + .btn { grid-column: 2 / -1; }
+
+/* ---------- battle ---------- */
+.combat { margin: 16px 0; }
+.combat-live { display: grid; gap: 14px; padding: 16px 14px; background: var(--night-2); border: 1px solid var(--gold-deep); border-radius: 16px; }
+.beam { position: relative; height: 108px; }
+.beam-arm { --tilt: 0deg; position: absolute; inset-inline: 7%; top: 26px; height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold), var(--gold-deep));
+  transform: rotate(calc(var(--tilt) * var(--dirsign))); transition: transform .7s cubic-bezier(.3, 1.4, .5, 1); }
+.pan { position: absolute; top: 4px; width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center;
+  border: 2px solid var(--gold-deep); background: var(--night);
+  transform: rotate(calc(var(--tilt) * var(--dirsign) * -1)); transition: transform .7s cubic-bezier(.3, 1.4, .5, 1); }
+.pan b { font-size: 1.8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pan-enemy { inset-inline-start: -34px; }
+.pan-enemy b { color: var(--blood-soft); }
+.pan-hero { inset-inline-end: -34px; }
+.pan-hero b { color: var(--gold); }
+.beam-post { position: absolute; left: 50%; top: 22px; width: 4px; height: 74px; margin-left: -2px; background: var(--line); border-radius: 2px; }
+.beam-post::before { content: ""; position: absolute; top: -6px; left: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--gold); }
+.dice-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dice-col { min-width: 0; }
+.dice-col h4 { font-size: .9rem; font-weight: 500; color: var(--ink-dim); margin: 0 0 8px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.die-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 6px; border-radius: 12px; }
+.die-pad.rerolling { outline: 2px dashed var(--gold); }
+.die { aspect-ratio: 1; max-width: 100%; min-height: 44px; padding: 7px; border-radius: 10px; background: var(--parchment); border: 2px solid transparent; }
+.die:disabled { opacity: .45; cursor: default; }
+.die.on { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212, 169, 76, .35); opacity: 1; }
+.face { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); width: 100%; height: 100%; }
+.face i { display: block; margin: 16%; border-radius: 50%; }
+.face i.pip { background: var(--pip); }
+.die-pad[data-who="enemy"] .die.on .face i.pip { background: var(--blood); }
+#btn-reroll.armed { border-color: var(--gold); color: var(--gold); }
+.protection, .result { text-align: center; display: grid; gap: 10px; }
+.protection p, .result p { font-size: 1.12rem; }
+.result[data-outcome="player_wins"] p { color: var(--gold); }
+.result[data-outcome="enemy_wins"] p { color: var(--blood-soft); }
+
+/* ---------- story log ---------- */
+.story-log { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.story-log li { display: grid; gap: 4px; }
+.story-log p { line-height: 1.55; }
+.story-log .rule { font: 400 .85rem var(--ui); color: var(--ink-dim); }
+.toast { position: fixed; inset-inline: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  max-width: 420px; margin: 0 auto; background: var(--ink); color: var(--night); padding: 12px 16px; border-radius: 12px; text-align: center; z-index: 20; }
+
+@media (max-width: 380px) {
+  .pan { width: 56px; height: 56px; } .pan-enemy { inset-inline-start: -28px; } .pan-hero { inset-inline-end: -28px; }
+  .pan b { font-size: 1.45rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beam-arm, .pan { transition: none; }
+  .story.fresh { animation: none; }
+  .spinner { animation-duration: 3s; }
+}
+
+/* ---------- live camera ---------- */
+.look #btn-live { min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.05rem; }
+.look #btn-live svg { width: 24px; height: 24px; }
+.live { border: 1px solid var(--line); border-radius: 14px; padding: 10px; margin-bottom: 16px; background: var(--night-2); display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
+.live-view { position: relative; border-radius: 10px; overflow: hidden; background: #000; height: min(34vh, 60vw); width: 100%; min-width: 0; }
+.live-view video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.live-dot { position: absolute; top: 10px; inset-inline-start: 10px; width: 14px; height: 14px; border-radius: 50%; background: #5fae6e; box-shadow: 0 0 0 3px rgba(0,0,0,.45); }
+.live-dot[data-state="moving"], .live-dot[data-state="settling"] { background: var(--gold); }
+.live-dot[data-state="looking"] { background: #6aa8e8; animation: pulse 1s ease-in-out infinite; }
+.live-dot[data-state="dark"], .live-dot[data-state="off"] { background: #b55a4f; }
+@keyframes pulse { 50% { transform: scale(1.35); } }
+.live-status { margin: 0; color: var(--ink-dim); font-size: .9rem; min-height: 1.3em; }
+.live-turn { display: grid; gap: 6px; font-size: .9rem; color: var(--ink-dim); }
+.live-pending { border: 1px solid var(--gold); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; background: var(--night-3); }
+.live-pending p { margin: 0; font-size: 1.05rem; color: var(--parchment); white-space: pre-line; }
+.countdown { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.countdown i { display: block; height: 100%; width: 100%; background: var(--gold); transform-origin: left; }
+[dir="rtl"] .countdown i { transform-origin: right; }
+.countdown i.run { transition: transform var(--dur, 4s) linear; transform: scaleX(0); }
+.live .row { display: flex; gap: 8px; }
+.live .row .btn { flex: 1; }
+.key-box { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin: 14px 0; display: grid; gap: 8px; text-align: center; }
+.key-box h3 { margin: 0; display: grid; gap: 2px; font-size: 1rem; }
+.key-form { display: flex; gap: 8px; }
+.key-form input { flex: 1; min-width: 0; }
+.key-box .fine { margin: 0; }
+.music-pack { position: relative; overflow: hidden; text-align: center; display: block; margin-bottom: 8px; }
+.music-pack input { position: absolute; inset: 0; opacity: 0; font-size: 0; }
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none !important; } .countdown i.run { transition: none; } }
+
+</style>
+</head>
+<body>
+
+<main id="app">
+
+  <!-- Home: bilingual, before a language is chosen -->
+  <section id="screen-home" class="screen">
+    <div class="hero">
+      <svg class="sigil" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="56"/><circle cx="60" cy="60" r="38"/><circle class="core" cx="60" cy="60" r="20"/>
+        <path d="M60 4v112M4 60h112"/>
+      </svg>
+      <h1><span lang="he">מספר הסיפורים</span><span lang="ru">Рассказчик</span></h1>
+    </div>
+    <div class="lang-pick">
+      <button class="btn" id="new-he" data-lang="he" lang="he" dir="rtl">משחק חדש בעברית</button>
+      <button class="btn" id="new-ru" data-lang="ru" lang="ru" dir="ltr">Новая игра на русском</button>
+    </div>
+    <div id="key-box" class="key-box" hidden>
+      <h3><span lang="he" dir="rtl" data-k="key_title"></span><span lang="ru" dir="ltr" data-k="key_title"></span></h3>
+      <div id="key-form" class="key-form">
+        <input id="key-input" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AIza…" dir="ltr" aria-label="Google AI key">
+        <button class="btn primary" id="key-save">OK</button>
+      </div>
+      <button class="link" id="key-change" hidden><span lang="he" data-k="key_change"></span> · <span lang="ru" data-k="key_change"></span></button>
+      <p id="key-status" class="fine"></p>
+      <p class="fine"><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><span lang="he" data-k="key_get"></span> · <span lang="ru" data-k="key_get"></span></a></p>
+      <p class="fine" lang="he" dir="rtl" data-k="key_privacy"></p>
+      <p class="fine" lang="ru" dir="ltr" data-k="key_privacy"></p>
+    </div>
+    <div id="saved" class="saved"></div>
+    <p id="storage-note" class="fine"></p>
+    <p class="fine" dir="ltr">Unofficial table companion · not affiliated with Games Workshop</p>
+  </section>
+
+  <!-- Setup -->
+  <section id="screen-setup" class="screen" hidden>
+    <header class="bar">
+      <button class="icon-btn" data-go="home" data-t-label="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <h2 data-t="new_game"></h2>
+    </header>
+    <div class="field-row">
+      <label><span data-t="edition"></span>
+        <select id="edition">
+          <option value="fifth" data-t="edition_fifth" selected></option>
+          <option value="revised_4th" data-t="edition_revised_4th"></option>
+        </select></label>
+      <label><span data-t="intensity"></span>
+        <select id="intensity">
+          <option value="minimal" data-t="intensity_minimal"></option>
+          <option value="balanced" data-t="intensity_balanced" selected></option>
+          <option value="cinematic" data-t="intensity_cinematic"></option>
+        </select></label>
+    </div>
+    <h3 data-t="players"></h3>
+    <ul id="setup-players" class="setup-players"></ul>
+    <form id="player-form" class="form" autocomplete="off">
+      <label class="wide"><span data-t="player_name"></span><input id="pf-name" name="name" required maxlength="24"></label>
+      <label class="wide"><span data-t="character"></span><input id="pf-character" name="character" required maxlength="24"></label>
+      <label><span data-t="strength"></span><input id="pf-strength" name="strength" type="number" min="0" max="20" value="3" required inputmode="numeric"></label>
+      <label><span data-t="craft"></span><input id="pf-craft" name="craft" type="number" min="0" max="20" value="3" required inputmode="numeric"></label>
+      <label><span data-t="lives"></span><input id="pf-lives" name="lives" type="number" min="1" max="20" value="4" required inputmode="numeric"></label>
+      <label><span data-t="fate"></span><input id="pf-fate" name="fate" type="number" min="0" max="20" value="2" required inputmode="numeric"></label>
+      <label><span data-t="gold"></span><input id="pf-gold" name="gold" type="number" min="0" max="99" value="1" required inputmode="numeric"></label>
+      <button type="submit" class="btn wide" data-t="add_player"></button>
+    </form>
+    <p id="setup-error" class="error" role="alert"></p>
+    <button id="start-game" class="btn primary" style="width:100%" data-t="start_game"></button>
+  </section>
+
+  <!-- The table -->
+  <section id="screen-table" class="screen" hidden>
+    <header class="bar">
+      <button class="icon-btn" data-go="home" data-t-label="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></button>
+      <button class="icon-btn" id="btn-undo" data-t-label="undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+      <button class="icon-btn" id="btn-log" data-t-label="story_log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7M8 11h7"/></svg></button>
+      <button class="icon-btn" id="btn-settings" data-t-label="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      <button class="icon-btn" id="btn-music" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>
+      <span class="spacer"></span>
+      <button class="btn-pause" id="btn-pause"><span data-t="pause"></span></button>
+    </header>
+
+    <figure class="scroll" aria-live="polite" style="margin-inline:0">
+      <p id="story" class="story"></p>
+      <p id="rules-line" class="rules-line" hidden></p>
+      <div class="scroll-actions">
+        <button class="link" id="btn-replay" data-t="replay"></button>
+        <button class="link" id="btn-tell" data-t="tell_story" hidden></button>
+        <span id="story-status" class="status"></span>
+      </div>
+    </figure>
+    <div id="voice-warning" class="notice voice-warning" hidden>
+      <p id="voice-warning-text"></p>
+      <button class="btn quiet" id="btn-test-voice-2" data-t="test_voice"></button>
+    </div>
+
+    <div class="look" id="look-box">
+      <label class="btn primary" id="look-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span data-t="look_btn"></span>
+        <input id="look-photo" type="file" accept="image/*" capture="environment">
+      </label>
+      <button class="btn" id="btn-live" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg>
+        <span data-t="live_btn"></span></button>
+      <p class="hint" id="look-hint" data-t="look_hint"></p>
+    </div>
+    <section id="live" class="live" hidden>
+      <div class="live-view"><video id="live-video" playsinline muted autoplay></video><span id="live-dot" class="live-dot" data-state="calm"></span></div>
+      <p id="live-status" class="live-status" aria-live="polite"></p>
+      <div class="live-turn"><span data-t="live_turn"></span><div id="live-who" class="who"></div></div>
+      <div id="live-pending" class="live-pending" hidden>
+        <p id="live-pending-text"></p>
+        <div class="countdown"><i id="live-countdown"></i></div>
+        <div class="choices" id="live-pending-actions"></div>
+      </div>
+      <div class="row">
+        <button class="btn quiet" id="live-look" data-t="live_look_now"></button>
+        <button class="btn" id="live-stop" data-t="live_stop"></button>
+      </div>
+      <p class="fine" data-t="live_hint"></p>
+    </section>
+    <p id="gm-note" class="notice" hidden></p>
+
+    <fieldset class="places-box">
+      <legend data-t="place"></legend>
+      <div id="places" class="who places"></div>
+    </fieldset>
+
+    <ul id="players" class="players"></ul>
+
+    <section id="combat" class="combat" hidden>
+      <form id="combat-form" class="form" autocomplete="off">
+        <fieldset class="seg">
+          <legend data-t="combat_type"></legend>
+          <label><input type="radio" name="ctype" id="cf-str" value="strength" checked><span data-t="strength"></span></label>
+          <label><input type="radio" name="ctype" id="cf-crf" value="craft"><span data-t="craft"></span></label>
+        </fieldset>
+        <label class="wide"><span data-t="enemy_name"></span><input id="cf-enemy" name="enemy_name" required maxlength="40"></label>
+        <label><span data-t="enemy_value"></span><input id="cf-value" name="enemy_value" type="number" min="0" max="30" value="4" required inputmode="numeric"></label>
+        <label><span data-t="weapon_bonus"></span><input id="cf-weapon" name="weapon" type="number" min="0" max="10" value="0" inputmode="numeric"></label>
+        <label><span data-t="other_bonus"></span><input id="cf-other" name="other" type="number" min="-10" max="20" value="0" inputmode="numeric"></label>
+        <label class="check wide"><input type="checkbox" id="cf-armour" name="armour"><span data-t="has_armour"></span></label>
+        <div class="row wide">
+          <button type="button" class="btn" id="combat-cancel" data-t="cancel"></button>
+          <button type="submit" class="btn primary" data-t="begin_battle"></button>
+        </div>
+      </form>
+
+      <div id="combat-live" class="combat-live" hidden>
+        <div class="beam" aria-hidden="true">
+          <div class="beam-arm" id="beam-arm">
+            <span class="pan pan-enemy"><b id="enemy-total">–</b></span>
+            <span class="pan pan-hero"><b id="hero-total">–</b></span>
+          </div>
+          <div class="beam-post"></div>
+        </div>
+        <div class="dice-cols">
+          <div class="dice-col"><h4 id="enemy-label"></h4><div class="die-pad" data-who="enemy"></div></div>
+          <div class="dice-col"><h4 id="hero-label"></h4><div class="die-pad" data-who="player"></div></div>
+        </div>
+        <label class="btn quiet" id="dice-photo-label" style="text-align:center;position:relative;overflow:hidden">
+          <span data-t="photo_dice"></span>
+          <input id="dice-photo" type="file" accept="image/*" capture="environment" style="position:absolute;inset:0;opacity:0;font-size:0">
+        </label>
+        <button class="btn" id="btn-reroll" hidden data-t="reroll"></button>
+        <button class="btn primary" id="btn-resolve" disabled data-t="resolve"></button>
+        <div id="protection" class="protection" hidden>
+          <p data-t="armour_question"></p>
+          <div class="row">
+            <button class="btn" data-prevented="false" data-t="not_saved"></button>
+            <button class="btn primary" data-prevented="true" data-t="saved"></button>
+          </div>
+        </div>
+        <div id="result" class="result" hidden>
+          <p id="result-text"></p>
+          <button class="btn" id="result-close" data-t="close"></button>
+        </div>
+      </div>
+    </section>
+
+    <p id="table-error" class="error" role="alert"></p>
+    <p class="fine" data-t="usage_note" id="usage-note" hidden></p>
+    <p class="fine" data-t="disclaimer"></p>
+  </section>
+
+  <!-- What the game master saw -->
+  <dialog id="look-dlg" class="sheet">
+    <header class="bar"><h2 data-t="seen"></h2><button class="icon-btn" data-close data-t-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="sheet-body">
+      <img id="look-img" class="photo" alt="">
+      <p id="look-busy" class="busy"><span class="spinner"></span><span data-t="looking"></span></p>
+      <div id="look-result" hidden></div>
+      <p id="look-error" class="error" role="alert"></p>
+      <p class="fine" data-t="privacy_photo"></p>
+    </div>
+  </dialog>
+
+  <!-- Story log -->
+  <dialog id="log-dlg" class="sheet">
+    <header class="bar"><h2 data-t="story_log"></h2><button class="icon-btn" data-close data-t-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <ol id="story-log" class="story-log"></ol>
+  </dialog>
+
+  <!-- Settings -->
+  <dialog id="settings-dlg" class="sheet">
+    <header class="bar"><h2 data-t="settings"></h2><button class="icon-btn" data-close data-t-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="sheet-body">
+      <label><span data-t="storyteller"></span>
+        <select id="set-storyteller">
+          <option value="fast" data-t="story_fast"></option>
+          <option value="rich" data-t="story_rich"></option>
+          <option value="off" data-t="story_off"></option>
+        </select></label>
+      <label><span data-t="intensity"></span>
+        <select id="set-intensity">
+          <option value="minimal" data-t="intensity_minimal"></option>
+          <option value="balanced" data-t="intensity_balanced"></option>
+          <option value="cinematic" data-t="intensity_cinematic"></option>
+        </select></label>
+      <label><span data-t="voice"></span><select id="set-voice"></select></label>
+      <label><span data-t="speed"></span><input id="set-rate" type="range" min="0.6" max="1.4" step="0.05" value="0.95"></label>
+      <label class="check"><input id="set-mute" type="checkbox"><span data-t="mute"></span></label>
+      <label><span data-t="music_volume"></span><input id="set-music-volume" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+      <h3 data-t="own_music"></h3>
+      <p class="fine" style="text-align:start" data-t="own_music_hint"></p>
+      <label class="btn quiet music-pack"><span data-t="music_pack"></span><input type="file" id="music-pack" accept="audio/*" multiple></label>
+      <ul id="own-music" class="own-music"></ul>
+      <p class="fine" style="text-align:start"><span data-t="sources_hint"></span>
+        <a href="https://opengameart.org/art-search-advanced?keys=medieval&field_art_type_tid%5B%5D=12" target="_blank" rel="noopener">OpenGameArt</a> ·
+        <a href="https://tabletopaudio.com/" target="_blank" rel="noopener">Tabletop Audio</a></p>
+      <button class="btn" id="btn-test-voice" data-t="test_voice"></button>
+      <p id="voice-status" class="fine" style="text-align:start"></p>
+      <p class="notice" id="voice-natural" hidden data-t="voice_natural_hint"></p>
+      <p class="fine" style="text-align:start" id="voice-tip"></p>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+</main>
+<script>
+window.TM_DATA = {"ui": {"he": {"app_name": "מספר הסיפורים", "tagline": "מנחה משחק לשולחן: רואה, סופר ומספר", "new_game": "משחק חדש", "saved_games": "משחקים שמורים", "no_saved": "אין משחקים שמורים עדיין.", "continue_game": "המשך", "storage_account": "המשחקים נשמרים בחשבון Claude שלך, רק אצלך.", "storage_browser": "המשחקים נשמרים בדפדפן הזה בלבד.", "storage_memory": "השמירה לא זמינה כאן: המשחק יימחק כשהדף ייסגר.", "edition": "מהדורה", "edition_fifth": "מהדורה חמישית", "edition_revised_4th": "מהדורה רביעית מתוקנת", "intensity": "סגנון הקריינות", "intensity_minimal": "תמציתית", "intensity_balanced": "מאוזנת", "intensity_cinematic": "קולנועית", "storyteller": "המנחה מספר", "story_fast": "מהיר", "story_rich": "עשיר (איטי יותר)", "story_off": "כבוי", "players": "שחקנים", "add_player": "הוספת שחקן", "player_name": "שם השחקן", "character": "דמות", "remove": "הסרה", "strength": "עוצמה", "craft": "מיומנות", "lives": "חיים", "fate": "גורל", "gold": "זהב", "start_game": "התחלת המשחק", "need_player": "הוסיפו לפחות שחקן אחד.", "look_btn": "להראות למנחה", "look_hint": "צלמו קלף שנשלף או קוביות שנעצרו.", "looking": "המנחה מסתכל…", "gm_unavailable": "המנחה (Claude) לא זמין בתצוגה הזו. הקרבות והקריינות עובדים כרגיל.", "gm_no_images": "התצוגה הזו לא יכולה לשלוח תמונות למנחה.", "gm_denied": "לא ניתן אישור להשתמש ב־Claude. אפשר לשנות זאת בהרשאות של הדף.", "gm_limit": "הגעתם למגבלת השימוש ב־Claude כרגע. נסו שוב מאוחר יותר.", "gm_error": "המנחה לא הצליח לענות. נסו שוב.", "seen": "המנחה רואה:", "card_for": "מי שלף את הקלף?", "confirm_card": "כן, זה הקלף", "retake": "צילום חוזר", "type_card_instead": "הקלדת הקלף ביד", "card_name": "שם הקלף", "card_text": "טקסט הקלף", "card_type": "סוג הקלף", "type_enemy": "יריב", "type_object": "חפץ", "type_magic_object": "חפץ קסום", "type_follower": "בן לוויה", "type_place": "מקום", "type_stranger": "זר", "type_event": "אירוע", "type_spell": "כישוף", "type_other": "אחר", "dice_seen": "על הקוביות:", "use_as_enemy": "קוביית {enemy}: {n}", "use_as_player": "הקובייה של {player}: {n}", "dice_no_battle": "אין קרב שמחכה לקוביות, ולכן התוצאה לא נרשמה.", "low_confidence": "המנחה לא בטוח. בדקו לפני שאתם מאשרים.", "problem": "מה לא נראה טוב:", "close": "סגירה", "cancel": "ביטול", "battle": "קרב", "combat_type": "סוג הקרב", "enemy_name": "שם היריב", "enemy_value": "ערך היריב", "weapon_bonus": "בונוס נשק", "other_bonus": "בונוסים אחרים", "has_armour": "יש שריון או חפץ מגן", "begin_battle": "התחלת הקרב", "total": "סך הכול", "reroll": "הטלה חוזרת בעזרת גורל", "resolve": "הכרעה", "armour_question": "האם השריון הגן?", "saved": "כן, הגן", "not_saved": "לא הגן", "photo_dice": "צילום הקוביות", "outcome_player_wins": "ניצחון", "outcome_enemy_wins": "תבוסה", "outcome_standoff": "תיקו", "at_village": "בכפר, לפני החזרה למסע", "buy_lives": "קניית חיים", "buy_lives_note": "נקודת חיים עולה מטבע זהב אחד. זהב: {gold}", "no_gold_note": "אין זהב: מגיעה נקודת חיים אחת בחינם.", "free_life": "קבלת נקודת חיים", "eliminated": "הודח", "undo": "ביטול הפעולה האחרונה", "undone": "הפעולה בוטלה", "pause": "השהיה", "resume_voice": "המשך", "replay": "השמעה חוזרת", "story_log": "ספר המסע", "settings": "הגדרות", "voice": "קול", "speed": "מהירות דיבור", "mute": "השתקה", "gm_writing": "המנחה כותב…", "tell_story": "המשך הסיפור", "story_rejected": "הקטע של המנחה הוזכר בו מספר, ולכן הוא לא נשמר. שורת החוקים נשארת.", "story_empty": "הסיפור יתחיל ברגע שיקרה משהו על הלוח.", "privacy_photo": "התמונה נשלחת ל־Claude רק כשמצלמים, ואינה נשמרת.", "usage_note": "המנחה משתמש בחשבון Claude שלך: בלי מפתח ובלי תשלום נוסף, לפי מגבלות התוכנית שלך.", "lives_minus": "פחות חיים", "lives_plus": "יותר חיים", "gold_minus": "פחות זהב", "gold_plus": "יותר זהב", "home": "מסך הבית", "delete_game": "מחיקה", "confirm_delete": "למחוק את המשחק? לחצו שוב לאישור.", "waiting_dice": "ממתין לקוביות", "example": "לדוגמה", "disclaimer": "כלי עזר לא רשמי לשולחן. אינו קשור ל־Games Workshop.", "test_voice": "בדיקת קול", "voice_sample": "בדיקת קול. אם שומעים אותי, המספר מוכן להרפתקה.", "voice_auto": "אוטומטי (לפי השפה)", "voice_status": "קולות בעברית במכשיר: {n} מתוך {all}. קול בשימוש: {voice}.", "no_speech": "התצוגה הזו לא מאפשרת הקראה. נסו לפתוח את הדף ב־Safari דרך claude.ai.", "no_voice_ios": "לא נמצא במכשיר קול בעברית. אפשר להתקין אחד בחינם: הגדרות ← נגישות ← תוכן מדובר ← קולות ← עברית.", "no_voice_android": "לא נמצא במכשיר קול בעברית. אפשר להתקין אחד בחינם: הגדרות ← נגישות ← המרת טקסט לדיבור ← מנוע Google ← התקנת נתוני קול ← עברית.", "no_voice_windows": "במחשב הזה אין קול בעברית. אפשר להתקין אחד בחינם: הגדרות Windows ← זמן ושפה ← דיבור ← ניהול קולות ← הוספת קולות ← עברית. אחר כך סגרו ופתחו מחדש את הדפדפן. אפשרות נוספת: לפתוח את הדף ב־Microsoft Edge, שבו יש קולות מוכנים.", "no_voice_mac": "במחשב הזה אין קול בעברית. אפשר להתקין אחד בחינם: הגדרות המערכת ← נגישות ← תוכן מדובר ← קול המערכת ← ניהול קולות ← עברית.", "no_voice_other": "לא נמצא במכשיר קול בעברית. התקינו קול עברי בהגדרות ההקראה של המכשיר.", "voice_tip_ios": "לקול טבעי יותר באייפון: הגדרות ← נגישות ← תוכן מדובר ← קולות, ובחרו קול ״משופר״ או ״פרימיום״ בעברית או ברוסית. ההורדה חינמית.", "voice_tip_android": "לקול טבעי יותר: הגדרות ← נגישות ← המרת טקסט לדיבור, והתקינו את נתוני הקול של Google לעברית ולרוסית.", "voice_tip_windows": "במחשב Windows הקולות הטבעיים ביותר נמצאים ב־Microsoft Edge (קולות ״Online (Natural)״), בחינם. אפשר גם להוסיף קולות: הגדרות ← זמן ושפה ← דיבור ← ניהול קולות.", "voice_tip_mac": "לקול טבעי יותר: הגדרות המערכת ← נגישות ← תוכן מדובר ← קול המערכת ← ניהול קולות, ובחרו קול ״משופר״ או ״פרימיום״.", "voice_tip_other": "הקולות מגיעים מהמכשיר עצמו. אפשר להתקין קולות נוספים בהגדרות ההקראה של המכשיר.", "voice_natural_hint": "הקול הנוכחי הוא קול בסיסי. לקול אנושי יותר בחינם: במחשב, פתחו את הדף ב־Microsoft Edge (קולות ״Natural״); באייפון, הורידו קול ״פרימיום״ בהגדרות ← נגישות ← תוכן מדובר ← קולות.", "place": "איפה אנחנו? (משנה את המוזיקה)", "scene_road": "דרך", "scene_village": "כפר", "scene_city": "עיר", "scene_tavern": "פונדק", "scene_forest": "יער", "scene_graveyard": "בית קברות", "scene_inner": "האזור הפנימי", "music_on": "הפעלת מוזיקה", "music_off": "השתקת מוזיקה", "music_volume": "עוצמת המוזיקה", "own_music": "המוזיקה שלכם", "own_music_hint": "אפשר לבחור קובץ מוזיקה לכל מקום. הקובץ נשמר רק במכשיר הזה ומתנגן בלולאה.", "builtin_music": "מוזיקה מובנית", "choose_file": "בחירת קובץ", "loading_file": "טוען…", "file_failed": "לא הצלחנו לנגן את הקובץ הזה. נסו MP3 או M4A.", "not_saved_device": "מתנגן, אבל לא נשמר במכשיר", "scene_battle": "קרב", "scene_mystic": "קרב מיומנות", "sources_hint": "מוזיקה ימי־ביניימית חינמית:", "live_btn": "מצלמה חיה", "live_hint": "העמידו את הטלפון על מעמד כך שהמצלמה תביט במקום ליד הלוח. הניחו שם את הקלף שנשלף והטילו שם את הקוביות — אחת בכל פעם. המנחה ישים לב בעצמו.", "live_turn": "התור של:", "live_calm": "צופה בשולחן…", "live_moving": "יש תנועה…", "live_settling": "מחכה שהכול ייעצר…", "live_dark": "חשוך מדי — המצלמה לא רואה.", "live_looking": "המנחה מסתכל…", "live_nothing": "שום דבר חדש. {seen}", "live_same_card": "הקלף הזה כבר נקרא.", "live_wait": "מגבלת החינם של Google: ממתין {s} שניות.", "live_dice_no_battle": "קוביות: {dice}. אין כרגע קרב.", "live_low": "לא בטוח שראיתי נכון. קרבו את הקלף למצלמה או לחצו „להסתכל עכשיו”.", "live_card": "קלף חדש: {card} — {player}", "live_battle": "קרב: {player} ⚔ {enemy} · {type} {value}", "live_die_enemy": "קוביית היריב ({enemy}): {n}", "live_die_player": "הקובייה של {player}: {n}", "live_die_reroll": "הטלה חוזרת — {player}: {n}", "live_which": "שתי קוביות — איזו של מי?", "live_ok": "כן, עכשיו", "live_edit": "לשנות", "live_look_now": "להסתכל עכשיו", "live_stop": "לכבות מצלמה", "live_stopped": "המצלמה נעצרה. לחצו „מצלמה חיה” כדי להמשיך.", "live_denied": "אין גישה למצלמה. אפשרו מצלמה לאתר: הגדרות ← Safari ← מצלמה.", "live_need_key": "למצלמה החיה צריך מפתח חינמי של Google (במסך הראשי).", "gm_bad_key": "מפתח Google לא התקבל. בדקו אותו במסך הראשי.", "gm_network": "אין חיבור לאינטרנט.", "gm_limit_site": "המכסה החינמית של Google נגמרה לעכשיו. חכו דקה.", "gm_unavailable_site": "המנחה כבוי: הוסיפו מפתח חינמי של Google במסך הראשי. קרבות וסיפור עובדים גם בלעדיו.", "privacy_photo_site": "התמונות נשלחות ל‑Google Gemini עם המפתח שלכם ולא נשמרות כאן. בתוכנית החינמית Google עשויה להשתמש בהן לשיפור השירותים שלה.", "usage_note_site": "המנחה פועל עם המפתח החינמי שלכם של Google Gemini.", "music_pack": "לטעון את כל המוזיקה בבת אחת", "music_pack_done": "נטענו מקומות: {n}", "key_title": "מפתח למנחה · Google AI (בחינם)", "key_get": "לקבל מפתח חינמי", "key_privacy": "המפתח נשמר רק בטלפון הזה. בתוכנית החינמית Google עשויה להשתמש בתמונות לשיפור השירותים שלה.", "key_checking": "בודק…", "key_ok": "המפתח עובד", "key_bad": "המפתח לא התקבל", "key_limit": "המפתח תקין, אבל המכסה נגמרה לעכשיו", "key_unchecked": "נשמר, אבל לא הצלחתי לבדוק (אין אינטרנט?)", "key_change": "להחליף מפתח"}, "ru": {"app_name": "Рассказчик", "tagline": "Ведущий за игровым столом: видит, считает и рассказывает", "new_game": "Новая игра", "saved_games": "Сохранённые игры", "no_saved": "Сохранённых игр пока нет.", "continue_game": "Продолжить", "storage_account": "Игры сохраняются в вашем аккаунте Claude, только для вас.", "storage_browser": "Игры сохраняются только в этом браузере.", "storage_memory": "Сохранение здесь недоступно: игра пропадёт, когда страница закроется.", "edition": "Издание", "edition_fifth": "5-е издание", "edition_revised_4th": "4-е исправленное издание", "intensity": "Стиль рассказа", "intensity_minimal": "Кратко", "intensity_balanced": "Сбалансированно", "intensity_cinematic": "Кинематографично", "storyteller": "Ведущий рассказывает", "story_fast": "Быстро", "story_rich": "Подробно (медленнее)", "story_off": "Выключено", "players": "Игроки", "add_player": "Добавить игрока", "player_name": "Имя игрока", "character": "Персонаж", "remove": "Убрать", "strength": "Сила", "craft": "Мастерство", "lives": "Жизни", "fate": "Судьба", "gold": "Золото", "start_game": "Начать игру", "need_player": "Добавьте хотя бы одного игрока.", "look_btn": "Показать ведущему", "look_hint": "Сфотографируйте вытянутую карту или остановившиеся кубики.", "looking": "Ведущий смотрит…", "gm_unavailable": "Ведущий (Claude) здесь недоступен. Бои и рассказ работают как обычно.", "gm_no_images": "Отсюда нельзя отправлять фотографии ведущему.", "gm_denied": "Использование Claude не разрешено. Это можно изменить в разрешениях страницы.", "gm_limit": "Сейчас достигнут лимит использования Claude. Попробуйте позже.", "gm_error": "Ведущий не смог ответить. Попробуйте ещё раз.", "seen": "Ведущий видит:", "card_for": "Кто вытянул карту?", "confirm_card": "Да, это карта", "retake": "Переснять", "type_card_instead": "Ввести карту вручную", "card_name": "Название карты", "card_text": "Текст карты", "card_type": "Тип карты", "type_enemy": "Враг", "type_object": "Предмет", "type_magic_object": "Магический предмет", "type_follower": "Спутник", "type_place": "Место", "type_stranger": "Незнакомец", "type_event": "Событие", "type_spell": "Заклинание", "type_other": "Другое", "dice_seen": "На кубиках:", "use_as_enemy": "Кубик врага ({enemy}): {n}", "use_as_player": "Кубик игрока {player}: {n}", "dice_no_battle": "Сейчас нет боя, который ждёт кубиков, поэтому результат не записан.", "low_confidence": "Ведущий не уверен. Проверьте, прежде чем подтверждать.", "problem": "Что видно плохо:", "close": "Закрыть", "cancel": "Отмена", "battle": "Бой", "combat_type": "Тип боя", "enemy_name": "Противник", "enemy_value": "Значение противника", "weapon_bonus": "Бонус оружия", "other_bonus": "Другие бонусы", "has_armour": "Есть доспех или защитный предмет", "begin_battle": "Начать бой", "total": "Итог", "reroll": "Перебросить за Судьбу", "resolve": "Подвести итог", "armour_question": "Доспех защитил?", "saved": "Да, защитил", "not_saved": "Не защитил", "photo_dice": "Сфотографировать кубики", "outcome_player_wins": "Победа", "outcome_enemy_wins": "Поражение", "outcome_standoff": "Ничья", "at_village": "В Деревне, перед возвращением в путь", "buy_lives": "Купить жизни", "buy_lives_note": "Одна жизнь стоит одну монету. Золото: {gold}", "no_gold_note": "Золота нет: одна жизнь бесплатно.", "free_life": "Получить жизнь", "eliminated": "Выбыл", "undo": "Отменить последнее", "undone": "Действие отменено", "pause": "Пауза", "resume_voice": "Продолжить", "replay": "Повторить", "story_log": "Летопись", "settings": "Настройки", "voice": "Голос", "speed": "Скорость речи", "mute": "Без звука", "gm_writing": "Ведущий пишет…", "tell_story": "Продолжить историю", "story_rejected": "В тексте ведущего оказались числа, поэтому он не сохранён. Остаётся строка правил.", "story_empty": "История начнётся, как только на поле что-то произойдёт.", "privacy_photo": "Фото отправляется Claude только когда вы снимаете, и не сохраняется.", "usage_note": "Ведущий использует ваш аккаунт Claude: без ключа и без доплаты, в пределах вашего тарифа.", "lives_minus": "Меньше жизней", "lives_plus": "Больше жизней", "gold_minus": "Меньше золота", "gold_plus": "Больше золота", "home": "На главную", "delete_game": "Удалить", "confirm_delete": "Удалить игру? Нажмите ещё раз для подтверждения.", "waiting_dice": "Ждём кубики", "example": "пример", "disclaimer": "Неофициальный помощник для игрового стола. Не связан с Games Workshop.", "test_voice": "Проверить голос", "voice_sample": "Проверка голоса. Если вы меня слышите, рассказчик готов к приключению.", "voice_auto": "Автоматически (по языку)", "voice_status": "Русских голосов на устройстве: {n} из {all}. Используется: {voice}.", "no_speech": "Здесь озвучка недоступна. Попробуйте открыть страницу в Safari через claude.ai.", "no_voice_ios": "На устройстве не найден русский голос. Его можно установить бесплатно: Настройки → Универсальный доступ → Устный контент → Голоса → Русский.", "no_voice_android": "На устройстве не найден русский голос. Его можно установить бесплатно: Настройки → Специальные возможности → Синтез речи → Google → Установить голосовые данные → Русский.", "no_voice_windows": "На этом компьютере нет русского голоса. Его можно установить бесплатно: Параметры Windows → Время и язык → Речь → Управление голосами → Добавить голоса → Русский. Потом закройте и снова откройте браузер. Или откройте страницу в Microsoft Edge: там русские голоса уже есть.", "no_voice_mac": "На этом компьютере нет русского голоса. Его можно установить бесплатно: Системные настройки → Универсальный доступ → Устный контент → Системный голос → Управление голосами → Русский.", "no_voice_other": "На устройстве не найден русский голос. Установите русский голос в настройках синтеза речи.", "voice_tip_ios": "Для более живого голоса на iPhone: Настройки → Универсальный доступ → Устный контент → Голоса, выберите «улучшенный» или «премиум» голос. Загрузка бесплатна.", "voice_tip_android": "Для более живого голоса: Настройки → Специальные возможности → Синтез речи, установите голосовые данные Google для русского и иврита.", "voice_tip_windows": "На компьютере с Windows самые естественные голоса есть в Microsoft Edge (голоса «Online (Natural)»), бесплатно. Голоса можно и добавить: Параметры → Время и язык → Речь → Управление голосами.", "voice_tip_mac": "Для более живого голоса: Системные настройки → Универсальный доступ → Устный контент → Системный голос → Управление голосами, выберите «улучшенный» или «премиум» голос.", "voice_tip_other": "Голоса берутся из самого устройства. Дополнительные голоса устанавливаются в настройках синтеза речи.", "voice_natural_hint": "Сейчас используется простой голос. Для более живого голоса бесплатно: на компьютере откройте страницу в Microsoft Edge (голоса «Natural»); на iPhone скачайте «премиум» голос в Настройки → Универсальный доступ → Устный контент → Голоса.", "place": "Где мы? (меняет музыку)", "scene_road": "Дорога", "scene_village": "Деревня", "scene_city": "Город", "scene_tavern": "Таверна", "scene_forest": "Лес", "scene_graveyard": "Кладбище", "scene_inner": "Внутренний круг", "music_on": "Включить музыку", "music_off": "Выключить музыку", "music_volume": "Громкость музыки", "own_music": "Своя музыка", "own_music_hint": "Для каждого места можно выбрать свой музыкальный файл. Он хранится только на этом устройстве и играет по кругу.", "builtin_music": "Встроенная музыка", "choose_file": "Выбрать файл", "loading_file": "Загрузка…", "file_failed": "Не удалось воспроизвести этот файл. Попробуйте MP3 или M4A.", "not_saved_device": "играет, но не сохранён на устройстве", "scene_battle": "Бой", "scene_mystic": "Бой Мастерства", "sources_hint": "Бесплатная средневековая музыка:", "live_btn": "Живая камера", "live_hint": "Поставьте телефон на подставку так, чтобы камера смотрела на место рядом с полем. Кладите туда вытянутую карту и бросайте там кубики — по одному. Ведущий заметит сам.", "live_turn": "Чей ход:", "live_calm": "Смотрю на стол…", "live_moving": "Вижу движение…", "live_settling": "Жду, пока всё остановится…", "live_dark": "Слишком темно — камере ничего не видно.", "live_looking": "Ведущий смотрит…", "live_nothing": "Ничего нового. {seen}", "live_same_card": "Эта карта уже прочитана.", "live_wait": "Бесплатный лимит Google: жду {s} с.", "live_dice_no_battle": "Кубики: {dice}. Боя сейчас нет.", "live_low": "Не уверен, что вижу правильно. Положите карту ближе к камере или нажмите «Посмотреть сейчас».", "live_card": "Новая карта: {card} — {player}", "live_battle": "Бой: {player} ⚔ {enemy} · {type} {value}", "live_die_enemy": "Кубик врага ({enemy}): {n}", "live_die_player": "Кубик — {player}: {n}", "live_die_reroll": "Переброс — {player}: {n}", "live_which": "Два кубика — какой чей?", "live_ok": "Да, сейчас", "live_edit": "Изменить", "live_look_now": "Посмотреть сейчас", "live_stop": "Выключить камеру", "live_stopped": "Камера остановилась. Нажмите «Живая камера», чтобы продолжить.", "live_denied": "Нет доступа к камере. Разрешите камеру для этого сайта: Настройки → Safari → Камера.", "live_need_key": "Для живой камеры нужен бесплатный ключ Google (на главном экране).", "gm_bad_key": "Ключ Google не подошёл. Проверьте его на главном экране.", "gm_network": "Нет связи с интернетом.", "gm_limit_site": "Бесплатный лимит Google на сейчас исчерпан. Подождите минуту.", "gm_unavailable_site": "Ведущий выключен: добавьте бесплатный ключ Google на главном экране. Бои и рассказ работают и без него.", "privacy_photo_site": "Снимки отправляются в Google Gemini по вашему ключу и не сохраняются здесь. На бесплатном тарифе Google может использовать их для улучшения своих сервисов.", "usage_note_site": "Ведущий работает на вашем бесплатном ключе Google Gemini.", "music_pack": "Загрузить всю музыку сразу", "music_pack_done": "Загружено мест: {n}", "key_title": "Ключ ведущего · Google AI (бесплатно)", "key_get": "Получить бесплатный ключ", "key_privacy": "Ключ хранится только на этом телефоне. На бесплатном тарифе Google может использовать снимки для улучшения своих сервисов.", "key_checking": "Проверяю…", "key_ok": "Ключ работает", "key_bad": "Ключ не подошёл", "key_limit": "Ключ верный, но лимит сейчас исчерпан", "key_unchecked": "Сохранён, но проверить не удалось (нет интернета?)", "key_change": "Изменить ключ"}}, "narration": {"he": {"_meta": {"language": "he", "direction": "rtl", "status": "draft — needs native-speaker review; phrasing avoids gendered verbs because player gender is not yet modelled; enemy names assumed grammatically masculine — needs a gender field in the card glossary", "terms_source": "Hebrew 5th edition box (confirmed by owner)"}, "terms": {"strength": "עוצמה", "craft": "מיומנות", "life": "נקודת חיים", "fate": "גורל"}, "player_joined": {"balanced": ["ברוכים הבאים למסע, {player}! הדמות: {character}.", "דמות חדשה על הלוח: {character}, בהנהגת {player}."]}, "combat_started": {"minimal": ["קרב {combat_type_term}: {player} מול {enemy} ({enemy_value})."], "balanced": ["{enemy} חוסם את הדרך. קרב {combat_type_term} מתחיל — {combat_type_term_def} של היריב: {enemy_value_word}.", "מן הצללים מגיח {enemy}; {combat_type_term_def} שלו: {enemy_value_word}. זהו קרב {combat_type_term}."], "cinematic": ["האוויר מצטנן. {enemy} מגיח מן הצללים, וטפריו שורטים את האבן. {combat_type_term_def} שלו: {enemy_value_word} — קרב {combat_type_term} מתחיל!", "אדמה רועדת תחת רגלי {enemy}. {combat_type_term_def} שלו, {enemy_value_word}, עומדת מול {player}. הגיע הזמן לקרב {combat_type_term}."]}, "enemy_rolled": {"minimal": ["{enemy}: קובייה {roll}, סך הכול {total}."], "balanced": ["{enemy} מטיל את הקובייה... {roll_word}! סך התקיפה: {total_word}. {player_prompt}", "הקובייה של {enemy} נעצרת על {roll_word}. סך הכול {total_word}. {player_prompt}"]}, "player_prompt": "{player}, תורך להטיל את הקובייה.", "player_rolled": {"minimal": ["{player}: קובייה {roll}."], "balanced": ["הקובייה של {player} נעצרת על {roll_word}.", "{roll_word}! זו התוצאה של {player}."]}, "fate_reroll": {"balanced": ["הגורל מתערב! הטלה חוזרת: {roll_word}. נקודות גורל שנותרו: {fate_left}."]}, "protection_check": {"balanced": ["{enemy} גובר — {enemy_total} מול {player_total}. {player}, בדקו אם השריון מגן, ודווחו על התוצאה."]}, "combat_resolved": {"player_wins": {"minimal": ["ניצחון ל־{player}: {player_total} מול {enemy_total}."], "balanced": ["{player_total_word} מול {enemy_total_word} — הניצחון של {player}! {enemy} נופל.", "{player} מכריע את {enemy}: {player_total_word} מול {enemy_total_word}."], "cinematic": ["פלדה פוגשת עצם, ו־{enemy} קורס ארצה. {player_total_word} מול {enemy_total_word} — הניצחון של {player}! היער נושם לרווחה."]}, "enemy_wins": {"minimal": ["{enemy} גובר: {enemy_total} מול {player_total}. המחיר: {lives_lost_words}. נותרו: {lives_left}."], "balanced": ["{enemy} גובר — {enemy_total_word} מול {player_total_word}. המחיר: {lives_lost_words}. נקודות חיים שנותרו ל־{player}: {lives_left}.", "{player_total_word} מול {enemy_total_word} — היתרון ל־{enemy}. המחיר: {lives_lost_words}. נקודות חיים שנותרו ל־{player}: {lives_left}."], "cinematic": ["{enemy_total_word} מול {player_total_word}. טפרים פוגעים, והמחיר כבד: {lives_lost_words}. היצור נסוג אל החשכה. נקודות חיים שנותרו ל־{player}: {lives_left}."]}, "enemy_wins_protected": {"balanced": ["{enemy} גובר, אבל {protection} עומד במכה! אף נקודת חיים לא אבדה."]}, "standoff": {"minimal": ["תיקו: {player_total} מול {enemy_total}."], "balanced": ["{player_total_word} מול {enemy_total_word} — תיקו. איש אינו נסוג, ואיש אינו נפגע."]}, "eliminated": "המסע של {player} הגיע לסופו.", "respawn": "זה לא הסוף: {player} — חזרה לכפר. בתור הבא אפשר לקנות נקודות חיים בזהב."}, "player_recovered": {"paid": {"balanced": ["חזרה למסע! {player} — נקודות חיים: {lives_bought}. זהב שנותר: {gold_left}."]}, "free": {"balanced": ["אין זהב, אבל הכפר רחום: נקודת חיים אחת בחינם ל־{player}. בחזרה למסע!"]}}, "card_drawn": {"enemy": {"minimal": ["{player}: יריב — {card_name}. {card_text}"], "balanced": ["קלף חדש עבור {player} — ויריב בדרך: {card_name}! {card_text}", "הקלף נחשף, ומול {player} עומד יריב: {card_name}. {card_text}"], "cinematic": ["הקלף מתהפך... ומן החשכה מגיח {card_name}! {card_text}"]}, "other": {"minimal": ["{player}: קלף «{card_name}». {card_text}"], "balanced": ["קלף חדש עבור {player}: «{card_name}». {card_text}"], "cinematic": ["הגורל פותח דף חדש: «{card_name}». {card_text}"]}}}, "ru": {"_meta": {"language": "ru", "direction": "ltr", "status": "draft — needs native-speaker review; present tense used to avoid gendered past-tense verbs", "terms_source": "No Russian 5th edition exists; Мастерство chosen to match Hebrew מיומנות (skill)"}, "terms": {"strength": "Сила", "craft": "Мастерство", "life": "жизнь", "fate": "Судьба"}, "player_joined": {"balanced": ["{player} вступает в путь в образе героя: {character}.", "Новый герой на поле — {character}. Ведёт его {player}."]}, "combat_started": {"minimal": ["Бой ({combat_type_term}): {player} против {enemy} ({enemy_value})."], "balanced": ["{enemy} преграждает путь. Начинается бой — {combat_type_term}. Мощь врага: {enemy_value_word}.", "Из тени выходит {enemy}, его мощь — {enemy_value_word}. Бой начинается: {combat_type_term}!"], "cinematic": ["Воздух стынет. Из тени выползает {enemy}, когти скребут по камню. Его мощь — {enemy_value_word}. Бой начинается!", "Земля дрожит под шагами врага: {enemy}. Мощь {enemy_value_word} против отваги героя по имени {player}."]}, "enemy_rolled": {"minimal": ["{enemy}: кубик {roll}, итог {total}."], "balanced": ["{enemy} бросает кубик... {roll_word}! Сила удара — {total_word}. {player_prompt}", "Кубик врага замирает на числе {roll_word}. Итог — {total_word}. {player_prompt}"]}, "player_prompt": "{player}, ваш бросок!", "player_rolled": {"minimal": ["{player}: кубик {roll}."], "balanced": ["Кубик замирает: {roll_word}.", "{roll_word}! Таков бросок героя по имени {player}."]}, "fate_reroll": {"balanced": ["Судьба вмешивается! Новый бросок: {roll_word}. Очков Судьбы осталось: {fate_left}."]}, "protection_check": {"balanced": ["{enemy} сильнее — {enemy_total} против {player_total}. {player}, проверьте защиту доспеха и сообщите результат."]}, "combat_resolved": {"player_wins": {"minimal": ["Победа: {player}, {player_total} против {enemy_total}."], "balanced": ["{player_total_word} против {enemy_total_gen} — {player} побеждает! Враг повержен.", "{player} одолевает врага по имени {enemy}: {player_total_word} против {enemy_total_gen}."], "cinematic": ["Сталь встречает кость, и {enemy} рушится наземь. {player_total_word} против {enemy_total_gen} — победа за героем по имени {player}! Лес облегчённо вздыхает."]}, "enemy_wins": {"minimal": ["{enemy} побеждает: {enemy_total} против {player_total}. −{lives_lost}, осталось {lives_left}."], "balanced": ["{enemy} берёт верх — {enemy_total_word} против {player_total_gen}. {player} теряет {lives_lost_words}. Осталось: {lives_left_words}.", "{enemy_total_word} против {player_total_gen} — перевес на стороне врага. {player} теряет {lives_lost_words}. Осталось: {lives_left_words}."], "cinematic": ["{enemy_total_word} против {player_total_gen}. Когти находят цель, и {player} теряет {lives_lost_words}. Тварь отступает во тьму. Осталось: {lives_left_words}."]}, "enemy_wins_protected": {"balanced": ["{enemy} берёт верх, но {protection} выдерживает удар! Ни одна жизнь не потеряна."]}, "standoff": {"minimal": ["Ничья: {player_total} против {enemy_total}."], "balanced": ["{player_total_word} против {enemy_total_gen} — ничья. Никто не отступает, никто не ранен."]}, "eliminated": "Путь героя по имени {player} окончен.", "respawn": "Но это не конец: {player} возвращается в Деревню. В следующий ход можно купить жизни за золото."}, "player_recovered": {"paid": {"balanced": ["{player} снова в пути! Куплено в Деревне: {lives_bought_words}. Золота осталось: {gold_left}."]}, "free": {"balanced": ["Золота нет, но Деревня милосердна: {player} получает одну жизнь даром. Снова в путь!"]}}, "card_drawn": {"enemy": {"minimal": ["{player}: враг — {card_name}. {card_text}"], "balanced": ["{player} тянет карту — и это враг: {card_name}! {card_text}", "Карта открыта, и перед героем по имени {player} встаёт враг: {card_name}. {card_text}"], "cinematic": ["Карта переворачивается... Из тьмы выходит {card_name}! {card_text}", "Тишину разрывает рёв: {card_name} преграждает путь. {card_text}"]}, "other": {"minimal": ["{player}: карта «{card_name}». {card_text}"], "balanced": ["{player} тянет карту: «{card_name}». {card_text}", "Новая карта для героя по имени {player}: «{card_name}». {card_text}"], "cinematic": ["Судьба открывает новую страницу: «{card_name}». {card_text}"]}}}}, "tracks": {}, "site": true, "loops": {"road": 117.95, "village": 38.94, "city": 43.4375, "tavern": 36.0361, "forest": 91.45, "graveyard": 56.6193, "inner": 137.95, "battle": 14.0115}};
+</script>
+<script>
+/* Rules engine — JavaScript port of backend/talisman (session.py, rules/combat.py,
+ * rules/editions.py). Pure: state = replay(events). The narrator and the game
+ * master only ever see facts this engine produced. */
+(function (root) {
+  "use strict";
+
+  const PROFILES = {
+    fifth: { edition: "fifth", dieSides: 6, tieIsStandoff: true, livesLostOnDefeat: 1,
+      maxWeapons: 1, maxArmour: 1, objectsProtectInCraft: false,
+      fateCanReroll: true, fateCostPerReroll: 1, maxRerollsPerRoll: 1,
+      deathRule: "respawn", respawnLifeCostGold: 1, respawnFreeLifeIfBroke: 1 },
+    revised_4th: { edition: "revised_4th", dieSides: 6, tieIsStandoff: true, livesLostOnDefeat: 1,
+      maxWeapons: 1, maxArmour: 1, objectsProtectInCraft: false,
+      fateCanReroll: true, fateCostPerReroll: 1, maxRerollsPerRoll: 1,
+      deathRule: "new_character", respawnLifeCostGold: 1, respawnFreeLifeIfBroke: 1 },
+  };
+  const LANGS = ["he", "ru"];
+
+  class RuleError extends Error {}
+  const fail = msg => { throw new RuleError(msg); };
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const isInt = v => Number.isInteger(v);
+
+  // ---------- combat (immutable updates on plain objects) -----------------
+  function startCombat(rules, type, player, enemy, fate) {
+    const w = player.modifiers.filter(m => m.kind === "weapon").length;
+    const a = player.modifiers.filter(m => m.kind === "armour").length;
+    if (w > rules.maxWeapons) fail(`at most ${rules.maxWeapons} weapon(s)`);
+    if (a > rules.maxArmour) fail(`at most ${rules.maxArmour} armour item(s)`);
+    return { type, player, enemy, fate, playerRoll: null, enemyRoll: null,
+      rerollsUsed: 0, phase: "awaiting_rolls", result: null };
+  }
+  const modTotal = c => c.modifiers.reduce((s, m) => s + m.value, 0);
+  function checkDie(rules, v) {
+    if (!isInt(v) || v < 1 || v > rules.dieSides) fail(`die result must be 1..${rules.dieSides}`);
+  }
+  function requirePhase(c, phase) { if (c.phase !== phase) fail(`not allowed in phase ${c.phase}`); }
+  const enemyTotal = c => (c.enemyRoll == null ? null : c.enemy.attribute + modTotal(c.enemy) + c.enemyRoll);
+  const playerTotal = c => (c.playerRoll == null ? null : c.player.attribute + modTotal(c.player) + c.playerRoll);
+  const missing = c => [c.enemyRoll == null && "enemy_roll", c.playerRoll == null && "player_roll"].filter(Boolean);
+
+  function resolveCombat(rules, c, hasProtection) {
+    requirePhase(c, "awaiting_rolls");
+    const m = missing(c);
+    if (m.length) fail("missing: " + m.join(", "));
+    const p = playerTotal(c), e = enemyTotal(c);
+    const outcome = p > e ? "player_wins" : e > p ? "enemy_wins" : "standoff";
+    const livesLost = outcome === "enemy_wins" ? rules.livesLostOnDefeat : 0;
+    if (c.type === "craft" && !rules.objectsProtectInCraft) hasProtection = false;
+    const result = { outcome, playerTotal: p, enemyTotal: e, margin: Math.abs(p - e),
+      playerRoll: c.playerRoll, enemyRoll: c.enemyRoll, livesLost, rerollsUsed: c.rerollsUsed, protection: null };
+    return { ...c, result, phase: outcome === "enemy_wins" && hasProtection ? "awaiting_protection" : "resolved" };
+  }
+
+  // ---------- reducer ------------------------------------------------------
+  function newState(p) {
+    if (!LANGS.includes(p.language)) fail(`unsupported language ${p.language}`);
+    if (!PROFILES[p.edition]) fail(`unknown edition ${p.edition}`);
+    return { edition: p.edition, language: p.language, players: {}, order: [], combat: null,
+      combatPlayer: null, drawn: [] };
+  }
+  const getPlayer = (s, id) => s.players[id] || fail("unknown player");
+  const withPlayer = (s, pl) => ({ ...s, players: { ...s.players, [pl.id]: pl } });
+  const active = s => (s.combat && s.combat.phase !== "resolved" ? s.combat : fail("no combat in progress"));
+
+  function reduce(state, ev) {
+    const p = ev.payload || {};
+    if (ev.type === "session_created") return [newState(p), []];
+    if (!state) fail("session not created");
+    const rules = PROFILES[state.edition];
+    const cue = (kind, facts, interruptible = true) => ({ kind, facts, seq: ev.seq, interruptible });
+
+    switch (ev.type) {
+      case "player_added": {
+        if (state.players[p.id]) fail("duplicate player id");
+        for (const k of ["strength", "craft", "lives", "fate", "gold"]) {
+          if (!isInt(p[k]) || p[k] < 0) fail(`${k} must be a whole number ≥ 0`);
+        }
+        if (!String(p.name || "").trim()) fail("player needs a name");
+        const pl = { id: p.id, name: String(p.name).trim(), character: String(p.character || "").trim(),
+          strength: p.strength, craft: p.craft, lives: p.lives, fate: p.fate, gold: p.gold,
+          startLives: p.lives, eliminated: false, downed: false, location: null };
+        return [{ ...withPlayer(state, pl), order: [...state.order, pl.id] },
+          [cue("player_joined", { player: pl.name, character: pl.character })]];
+      }
+      case "combat_started": {
+        if (state.combat && state.combat.phase !== "resolved") fail("a battle is already in progress");
+        const pl = getPlayer(state, p.player_id);
+        if (pl.eliminated) fail("this player is out of the game");
+        if (pl.downed) fail("this player must recover at the Village first");
+        if (!["strength", "craft"].includes(p.combat_type)) fail("combat type must be strength or craft");
+        if (!isInt(p.enemy_value) || p.enemy_value < 0) fail("enemy value must be a whole number");
+        if (!String(p.enemy_name || "").trim()) fail("enemy needs a name");
+        const mods = (p.modifiers || []).map(m => ({ source: String(m.source), value: Math.trunc(Number(m.value)) || 0,
+          kind: ["weapon", "armour"].includes(m.kind) ? m.kind : "other" }));
+        const attr = p.combat_type === "strength" ? pl.strength : pl.craft;
+        const c = startCombat(rules, p.combat_type, { name: pl.name, attribute: attr, modifiers: mods },
+          { name: String(p.enemy_name).trim(), attribute: p.enemy_value, modifiers: [] }, pl.fate);
+        return [{ ...state, combat: c, combatPlayer: pl.id },
+          [cue("combat_started", { player: pl.name, enemy: c.enemy.name, combat_type: c.type,
+            enemy_value: c.enemy.attribute }, false)]];
+      }
+      case "enemy_rolled": {
+        let c = active(state); requirePhase(c, "awaiting_rolls"); checkDie(rules, p.value);
+        c = { ...c, enemyRoll: p.value };
+        return [{ ...state, combat: c }, [cue("enemy_rolled", { enemy: c.enemy.name, player: c.player.name,
+          roll: p.value, total: enemyTotal(c), awaiting_player: c.playerRoll == null, combat_type: c.type })]];
+      }
+      case "player_rolled": {
+        let c = active(state); requirePhase(c, "awaiting_rolls"); checkDie(rules, p.value);
+        c = { ...c, playerRoll: p.value };
+        return [{ ...state, combat: c }, [cue("player_rolled", { player: c.player.name, roll: p.value })]];
+      }
+      case "fate_reroll": {
+        let c = active(state); requirePhase(c, "awaiting_rolls");
+        if (!rules.fateCanReroll) fail("this edition does not allow fate re-rolls");
+        if (c.playerRoll == null) fail("there is no roll to re-roll yet");
+        if (c.rerollsUsed >= rules.maxRerollsPerRoll) fail("this roll was already re-rolled; keep the new result");
+        if (c.fate < rules.fateCostPerReroll) fail("not enough fate");
+        checkDie(rules, p.value);
+        c = { ...c, playerRoll: p.value, fate: c.fate - rules.fateCostPerReroll, rerollsUsed: c.rerollsUsed + 1 };
+        const pl = { ...state.players[state.combatPlayer], fate: c.fate };
+        return [{ ...withPlayer(state, pl), combat: c },
+          [cue("fate_reroll", { player: c.player.name, roll: p.value, fate_left: c.fate })]];
+      }
+      case "combat_resolve": {
+        const c = resolveCombat(rules, active(state), !!p.player_has_protection);
+        return finish(state, c, ev, rules);
+      }
+      case "protection_result": {
+        const c0 = active(state); requirePhase(c0, "awaiting_protection");
+        const prevented = !!p.prevented;
+        const c = { ...c0, phase: "resolved", result: { ...c0.result,
+          livesLost: prevented ? 0 : c0.result.livesLost, protection: prevented ? String(p.source || "") : null } };
+        return finish(state, c, ev, rules);
+      }
+      case "lives_adjusted": {
+        const pl = getPlayer(state, p.player_id);
+        const lives = Math.max(0, pl.lives + (Math.trunc(p.delta) || 0));
+        const fixed = lives > 0 ? { ...pl, lives, downed: false, eliminated: false } : { ...pl, lives };
+        return [withPlayer(state, fixed), []];
+      }
+      case "gold_adjusted": {
+        const pl = getPlayer(state, p.player_id);
+        return [withPlayer(state, { ...pl, gold: Math.max(0, pl.gold + (Math.trunc(p.delta) || 0)) }), []];
+      }
+      case "player_recovered": {
+        const pl = getPlayer(state, p.player_id);
+        if (!pl.downed) fail("this player is not waiting at the Village");
+        let bought, cost;
+        if (pl.gold < rules.respawnLifeCostGold) { bought = rules.respawnFreeLifeIfBroke; cost = 0; }
+        else {
+          bought = Math.trunc(p.lives_bought);
+          const cap = Math.min(pl.startLives || bought, Math.floor(pl.gold / rules.respawnLifeCostGold));
+          if (!(bought >= 1 && bought <= cap)) fail(`lives bought must be between 1 and ${cap}`);
+          cost = bought * rules.respawnLifeCostGold;
+        }
+        const pl2 = { ...pl, lives: bought, gold: pl.gold - cost, downed: false };
+        return [withPlayer(state, pl2), [cue("player_recovered",
+          { player: pl.name, lives_bought: bought, gold_spent: cost, gold_left: pl2.gold })]];
+      }
+      case "card_drawn": {
+        const pl = getPlayer(state, p.player_id);
+        const card = clone(p.card || {});
+        if (!card.name_he && !card.name_ru) fail("card needs a name");
+        if (!card.card_type) card.card_type = "other";
+        const facts = { player: pl.name, card_type: card.card_type,
+          name_he: card.name_he || "", name_ru: card.name_ru || "", text_he: card.text_he || "", text_ru: card.text_ru || "" };
+        if (card.card_type === "enemy") Object.assign(facts, { combat_type: card.combat_type ?? null, enemy_value: card.enemy_value ?? null });
+        return [{ ...state, drawn: [...state.drawn, { player: pl.id, card, seq: ev.seq }] },
+          [cue("card_drawn", facts, false)]];
+      }
+      default: fail(`unknown event ${ev.type}`);
+    }
+  }
+
+  function finish(state, c, ev, rules) {
+    const cue = (kind, facts) => ({ kind, facts, seq: ev.seq, interruptible: false });
+    const r = c.result;
+    if (c.phase === "awaiting_protection") {
+      return [{ ...state, combat: c }, [cue("protection_check", { player: c.player.name, enemy: c.enemy.name,
+        player_total: r.playerTotal, enemy_total: r.enemyTotal })]];
+    }
+    const pl = state.players[state.combatPlayer];
+    const lives = Math.max(0, pl.lives - r.livesLost);
+    const respawn = lives === 0 && rules.deathRule === "respawn";
+    const pl2 = { ...pl, lives, eliminated: lives === 0 && !respawn, downed: respawn,
+      location: respawn ? "Village" : pl.location };
+    return [{ ...withPlayer(state, pl2), combat: c }, [cue("combat_resolved", {
+      player: c.player.name, enemy: c.enemy.name, combat_type: c.type, outcome: r.outcome,
+      player_roll: r.playerRoll, enemy_roll: r.enemyRoll, player_total: r.playerTotal, enemy_total: r.enemyTotal,
+      margin: r.margin, lives_lost: r.livesLost, lives_left: lives, protection: r.protection,
+      eliminated: pl2.eliminated, respawn })]];
+  }
+
+  // ---------- session: log + replay ---------------------------------------
+  class Session {
+    constructor(events) {
+      this.events = [];
+      this.state = null;
+      for (const ev of events) { this.state = reduce(this.state, ev)[0]; this.events.push(ev); }
+      this.nextSeq = events.length ? events[events.length - 1].seq + 1 : 1;
+    }
+    static create(edition, language) {
+      const s = new Session([]);
+      s.dispatch("session_created", { edition, language });
+      return s;
+    }
+    dispatch(type, payload, source = "user") {
+      if (source === "observed") fail("an unconfirmed observation cannot change the game");
+      const ev = { seq: this.nextSeq, type, payload: clone(payload || {}), ts: Date.now(), source };
+      const [state, cues] = reduce(this.state, ev);   // throws before anything changes
+      this.events.push(ev); this.state = state; this.nextSeq += 1;
+      return cues;
+    }
+    undo() {
+      if (this.events.length <= 1) fail("nothing to undo");
+      const removed = this.events.pop();
+      let st = null;
+      for (const ev of this.events) st = reduce(st, ev)[0];
+      this.state = st;
+      return removed;
+    }
+    get rules() { return PROFILES[this.state.edition]; }
+  }
+
+  const api = { Session, reduce, PROFILES, RuleError, enemyTotal, playerTotal, missing };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.TMEngine = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+/* Template narrator: language-neutral cue -> Hebrew or Russian line.
+ * Port of backend/talisman/narration (grammar.py + narrator.py). The line
+ * templates themselves are the same JSON files, embedded at build time. */
+(function (root) {
+  "use strict";
+
+  const HE_F = ["אפס", "אחת", "שתיים", "שלוש", "ארבע", "חמש", "שש", "שבע", "שמונה", "תשע", "עשר",
+    "אחת־עשרה", "שתים־עשרה", "שלוש־עשרה", "ארבע־עשרה", "חמש־עשרה", "שש־עשרה",
+    "שבע־עשרה", "שמונה־עשרה", "תשע־עשרה", "עשרים"];
+  const HE_CONSTRUCT = { 2: "שתי", 3: "שלוש", 4: "ארבע", 5: "חמש", 6: "שש", 7: "שבע", 8: "שמונה", 9: "תשע", 10: "עשר" };
+  const RU = ["ноль", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять",
+    "десять", "одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать",
+    "шестнадцать", "семнадцать", "восемнадцать", "девятнадцать", "двадцать"];
+  const RU_GEN = ["нуля", "одного", "двух", "трёх", "четырёх", "пяти", "шести", "семи", "восьми", "девяти",
+    "десяти", "одиннадцати", "двенадцати", "тринадцати", "четырнадцати", "пятнадцати",
+    "шестнадцати", "семнадцати", "восемнадцати", "девятнадцати", "двадцати"];
+
+  const heNumber = n => HE_F[n] ?? String(n);
+  const heLives = n => (n === 1 ? "נקודת חיים אחת" : `${HE_CONSTRUCT[n] ?? n} נקודות חיים`);
+  function ruPlural(n, one, few, many) {
+    const n100 = Math.abs(n) % 100, n10 = Math.abs(n) % 10;
+    if (n10 === 1 && n100 !== 11) return one;
+    if (n10 >= 2 && n10 <= 4 && !(n100 >= 12 && n100 <= 14)) return few;
+    return many;
+  }
+  const ruNumber = n => RU[n] ?? String(n);
+  const ruGen = n => RU_GEN[n] ?? String(n);
+  const ruLivesAcc = n => `${({ 1: "одну", 2: "две" })[n] ?? ruNumber(n)} ${ruPlural(n, "жизнь", "жизни", "жизней")}`;
+  const ruLivesNom = n => `${({ 1: "одна", 2: "две" })[n] ?? ruNumber(n)} ${ruPlural(n, "жизнь", "жизни", "жизней")}`;
+
+  const HELPERS = {
+    he: { num: heNumber, gen: heNumber, livesAcc: heLives, livesNom: heLives },
+    ru: { num: ruNumber, gen: ruGen, livesAcc: ruLivesAcc, livesNom: ruLivesNom },
+  };
+  const INTENSITIES = ["minimal", "balanced", "cinematic"];
+  const FALLBACK = { minimal: ["minimal", "balanced"], balanced: ["balanced", "minimal"],
+    cinematic: ["cinematic", "balanced", "minimal"] };
+
+  class Narrator {
+    constructor(locales, language, intensity = "balanced", rand = Math.random) {
+      if (!locales[language]) throw new Error(`no narration for ${language}`);
+      this.loc = locales[language]; this.lang = language; this.h = HELPERS[language];
+      this.intensity = INTENSITIES.includes(intensity) ? intensity : "balanced";
+      this.rand = rand; this.last = {};
+    }
+    variants(node) {
+      for (const level of FALLBACK[this.intensity]) if (node[level] && node[level].length) return node[level];
+      throw new Error("no template variants");
+    }
+    pick(key, vs) {
+      const choices = vs.filter(v => v !== this.last[key]);
+      const pool = choices.length ? choices : vs;
+      const v = pool[Math.floor(this.rand() * pool.length)];
+      this.last[key] = v; return v;
+    }
+    fields(facts) {
+      const f = { ...facts };
+      for (const [k, v] of Object.entries(facts)) {
+        if (Number.isInteger(v)) { f[k + "_word"] = this.h.num(v); f[k + "_gen"] = this.h.gen(v); }
+      }
+      if ("lives_lost" in f) f.lives_lost_words = this.h.livesAcc(f.lives_lost);
+      if ("lives_left" in f) f.lives_left_words = this.h.livesNom(f.lives_left);
+      if ("lives_bought" in f) f.lives_bought_words = this.h.livesNom(f.lives_bought);
+      if (f.combat_type) {
+        const term = this.loc.terms[f.combat_type];
+        f.combat_type_term = term;
+        f.combat_type_term_def = this.lang === "he" ? "ה" + term : term;
+      }
+      if ("name_he" in f) {
+        f.card_name = f["name_" + this.lang] || f.name_he || f.name_ru;
+        f.card_text = f["text_" + this.lang] || "";
+      }
+      if ("player" in f) f.player_prompt = f.awaiting_player === false ? "" : this.loc.player_prompt.replace("{player}", f.player);
+      return f;
+    }
+    narrate(cue) {
+      let node = this.loc[cue.kind];
+      if (!node) return null;
+      const f = this.fields(cue.facts);
+      let key = cue.kind;
+      if (cue.kind === "combat_resolved") {
+        let o = f.outcome;
+        if (o === "enemy_wins" && f.protection) o = "enemy_wins_protected";
+        key += "." + o; node = node[o];
+      } else if (cue.kind === "card_drawn") {
+        const b = f.card_type === "enemy" ? "enemy" : "other"; key += "." + b; node = node[b];
+      } else if (cue.kind === "player_recovered") {
+        const b = f.gold_spent === 0 ? "free" : "paid"; key += "." + b; node = node[b];
+      }
+      let text = this.pick(key, this.variants(node)).replace(/\{(\w+)\}/g, (m, k) => {
+        if (!(k in f)) throw new Error(`template field {${k}} missing`);
+        return String(f[k] ?? "");
+      }).trim();
+      if (cue.kind === "combat_resolved" && f.eliminated) text += " " + this.loc.combat_resolved.eliminated.replace("{player}", f.player);
+      else if (cue.kind === "combat_resolved" && f.respawn) text += " " + this.loc.combat_resolved.respawn.replace("{player}", f.player);
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+      return { text, kind: cue.kind, seq: cue.seq, interruptible: cue.interruptible };
+    }
+  }
+
+  const api = { Narrator, ruPlural, ruLivesAcc, ruLivesNom, heLives, INTENSITIES };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.TMNarration = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+/* The game master: Claude, reached through the page's `sample` capability on
+ * the viewer's own claude.ai account (no API key, no extra payment).
+ * Two jobs, both advisory:
+ *   look()  — a photo -> what is on it (a card, read and translated; dice)
+ *   tell()  — confirmed game facts -> the next passage of the story
+ * Nothing it says changes the game until a player confirms it, and story text
+ * that states numbers is thrown away (the rules engine owns the numbers). */
+(function (root) {
+  "use strict";
+
+  const LANG_NAME = { he: "Hebrew", ru: "Russian" };
+  const GLOSSARY = `Fixed terms from this Hebrew 5th-edition box:
+עוצמה = Strength = Сила
+מיומנות = Craft = Мастерство
+נקודת חיים / חיים = Life = жизнь / жизни
+גורל = Fate = Судьба
+זהב = Gold = золото
+כפר = Village = Деревня`;
+  const CARD_TYPES = ["enemy", "object", "magic_object", "follower", "place", "stranger", "event", "spell", "other"];
+
+  function situation(state) {
+    const players = state.order.map(id => state.players[id])
+      .map(p => `${p.name} (${p.character || "hero"})`).join(", ");
+    const c = state.combat && state.combat.phase === "awaiting_rolls" ? state.combat : null;
+    const battle = c ? `A battle is waiting for dice: ${c.player.name} against ${c.enemy.name}` +
+      ` (still needed: ${[c.enemyRoll == null && "the creature's die", c.playerRoll == null && c.player.name + "'s die"]
+        .filter(Boolean).join(" and ") || "nothing"}).` : "No battle is waiting for dice.";
+    return `Players: ${players || "none yet"}.\n${battle}`;
+  }
+
+  function lookPrompt(state, lang, auto = false) {
+    const how = auto
+      ? `The photo was taken automatically by a phone camera on a stand, watching the spot beside the board where players put a card they just drew and roll their dice. It was taken because something there changed. Hands, phones, cups and the board itself do not matter.`
+      : `The photo was just taken by a player with a phone.`;
+    return `You are the eyes of a game master at a family table playing the board game Talisman, 5th edition, Hebrew-language box.
+${how} Say what it shows that matters to the game.
+
+${situation(state)}
+
+Identify ONE of these:
+- "card": a single game card is the main subject. Copy its Hebrew title and rules text exactly as printed (name_he, text_he), and translate both into natural Russian (name_ru, text_ru) that a family can read aloud (keep every number, condition and effect; add nothing). For an enemy card, give its combat type ("strength" if its value is labelled עוצמה, "craft" if מיומנות) and its printed value.
+- "dice": one or more six-sided dice that have stopped rolling. Give the top face of each die you can see clearly. Leave out any die that is tilted, blurred, covered or cut off, and say so in "problem".
+- "other": something else on the board (describe it briefly).
+- "unclear": you cannot tell reliably.
+
+${auto ? `If dice are visible and a battle is waiting for dice, answer "dice" even if a card also lies there.
+` : ""}Never guess. If text is unreadable, leave it out and say what is missing in "problem".
+
+${GLOSSARY}
+
+Reply with only this JSON:
+{"kind":"card|dice|other|unclear","seen":"one short sentence in ${LANG_NAME[lang]} describing what you see",
+ "card":{"name_he":"","text_he":"","name_ru":"","text_ru":"","card_type":"${CARD_TYPES.join("|")}","combat_type":"strength|craft|null","enemy_value":null} or null,
+ "dice":[4,2] or [],
+ "confidence":"high|medium|low","problem":""}`;
+  }
+
+  // Check every field we rely on; drop anything malformed rather than trusting it.
+  function cleanLook(raw) {
+    const r = raw && typeof raw === "object" ? raw : {};
+    const kind = ["card", "dice", "other", "unclear"].includes(r.kind) ? r.kind : "unclear";
+    const out = { kind, seen: String(r.seen || "").slice(0, 400), problem: String(r.problem || "").slice(0, 400),
+      confidence: ["high", "medium", "low"].includes(r.confidence) ? r.confidence : "low", card: null, dice: [] };
+    if (kind === "card" && r.card && typeof r.card === "object") {
+      const c = r.card;
+      const s = k => String(c[k] ?? "").trim().slice(0, 1500);
+      const card = { name_he: s("name_he"), text_he: s("text_he"), name_ru: s("name_ru"), text_ru: s("text_ru"),
+        card_type: CARD_TYPES.includes(c.card_type) ? c.card_type : "other", combat_type: null, enemy_value: null };
+      if (card.card_type === "enemy") {
+        card.combat_type = ["strength", "craft"].includes(c.combat_type) ? c.combat_type : null;
+        const v = Number(c.enemy_value);
+        card.enemy_value = Number.isInteger(v) && v >= 0 && v <= 30 ? v : null;
+      }
+      if (card.name_he || card.name_ru) out.card = card; else out.kind = "unclear";
+    }
+    if (kind === "dice" && Array.isArray(r.dice)) {
+      out.dice = r.dice.map(Number).filter(v => Number.isInteger(v) && v >= 1 && v <= 6).slice(0, 4);
+      if (!out.dice.length) out.kind = "unclear";
+    }
+    return out;
+  }
+
+  const LENGTH = { minimal: "one or two short sentences", balanced: "two or three sentences",
+    cinematic: "three to five vivid sentences" };
+
+  function factLine(f) {
+    const x = { ...f.facts };
+    // the storyteller gets names and outcomes, not dice arithmetic
+    for (const k of ["player_roll", "enemy_roll", "player_total", "enemy_total", "margin", "roll", "total",
+      "enemy_value", "fate_left", "gold_left", "gold_spent", "awaiting_player"]) delete x[k];
+    return JSON.stringify({ event: f.kind, ...x });
+  }
+
+  function tellPrompt({ lang, intensity, state, storySoFar, facts }) {
+    const heroes = state.order.map(id => state.players[id]).map(p => `${p.name} the ${p.character || "hero"}`).join("; ");
+    const recent = storySoFar.slice(-4).join("\n\n") || "(the story has not begun yet)";
+    return `You are the game master narrating a family game of Talisman (a fantasy board game). Write the NEXT passage of the story in ${LANG_NAME[lang]}.
+
+Heroes at the table: ${heroes}.
+
+The story so far (most recent last):
+${recent}
+
+What just happened, as confirmed by the players (in order):
+${facts.map(factLine).join("\n")}
+
+Rules for the passage:
+- Narrate only these confirmed events. Do not invent outcomes, wounds, treasure, places or card effects that are not listed.
+- Write no digits and no numbers at all; the players already heard the numbers.
+- Length: ${LENGTH[intensity] || LENGTH.balanced}.
+- Tone: atmospheric fantasy, warm and fit for a family; continue the story so far without repeating it.
+- You do not know the players' genders: phrase sentences so gender does not matter (use names, plural or impersonal forms).
+- Card names may be given in Hebrew and Russian; use the ${LANG_NAME[lang]} name.
+Reply with the passage only.`;
+  }
+
+  const hasDigits = s => /[0-9٠-٩]/.test(s);
+
+  class GameMaster {
+    constructor(sample, imagesOk) { this.sample = sample; this.imagesOk = imagesOk; }
+
+    static async connect() {
+      const use = root.claude && typeof root.claude.use === "function" ? root.claude.use.bind(root.claude) : null;
+      if (!use) return null;
+      const sample = await use("sample").catch(() => null);
+      if (!sample) return null;
+      const lim = await sample.limits().catch(() => null);
+      return new GameMaster(sample, !!(lim && lim.images));
+    }
+
+    async look(image, state, lang, signal) {
+      const raw = await this.sample.json(lookPrompt(state, lang), { images: [image], signal, cache: false });
+      return cleanLook(raw);
+    }
+
+    /** Resolves {text} or {rejected: reason}. Streams through onText. */
+    async tell(ctx, { onText, signal, fast = true } = {}) {
+      const { text } = await this.sample(tellPrompt(ctx), { onText, signal, cache: false,
+        modelTier: fast ? "quick" : "default" });
+      const t = text.trim();
+      if (hasDigits(t)) return { rejected: "numbers" };
+      if (t.length > 2000) return { rejected: "length" };
+      return { text: t };
+    }
+  }
+
+  // ---------- the same game master on Google's free Gemini API -------------------
+  // Used on the stand-alone site (outside claude.ai), where the page may use the
+  // camera but has no Claude. The key is the owner's own free key, kept on the phone.
+  const GEMINI = "https://generativelanguage.googleapis.com/v1beta/models/";
+  const MODELS = {                       // tried in order; the next one if a model is missing or out of quota
+    look: ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"],
+    tell: ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash", "gemini-2.5-flash-lite"],
+  };
+  const gErr = (code, message, extra) => Object.assign(new Error(message || code), { code }, extra || {});
+
+  async function blobToBase64(blob) {
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let bin = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  }
+  // Pull a JSON object out of a reply even if it came wrapped in ``` fences or prose.
+  function parseJsonReply(text) {
+    const s = String(text || "").trim();
+    try { return JSON.parse(s); } catch { /* try harder */ }
+    const a = s.indexOf("{"), b = s.lastIndexOf("}");
+    if (a >= 0 && b > a) { try { return JSON.parse(s.slice(a, b + 1)); } catch { /* fall through */ } }
+    throw gErr("bad_reply", "the reply was not JSON");
+  }
+  const retrySeconds = body => {
+    const d = ((body && body.error && body.error.details) || []).find(x => x && x.retryDelay);
+    const n = d ? parseFloat(String(d.retryDelay)) : NaN;
+    return Number.isFinite(n) ? Math.ceil(n) : null;
+  };
+
+  class GeminiMaster {
+    constructor(key, fetchFn) {
+      this.key = String(key || "").trim(); this.fetch = fetchFn || root.fetch.bind(root);
+      this.imagesOk = true; this.auto = true; this.kind = "gemini";
+      this.skip = { look: new Set(), tell: new Set() };   // models that answered "not found"
+      this.thinking = true;                               // send a low thinking level until a model refuses it
+    }
+    async call(job, parts, { json = false, signal } = {}) {
+      let lastErr = null;
+      for (const model of MODELS[job]) {
+        if (this.skip[job].has(model)) continue;
+        const generationConfig = { temperature: job === "look" ? 0.1 : 0.8, maxOutputTokens: 4096 };
+        if (json) generationConfig.responseMimeType = "application/json";
+        if (this.thinking && /^gemini-3/.test(model)) generationConfig.thinkingConfig = { thinkingLevel: "low" };
+        let res, body;
+        if (signal && signal.aborted) throw gErr("cancelled");
+        try {
+          res = await this.fetch(GEMINI + model + ":generateContent", { method: "POST", signal,
+            headers: { "Content-Type": "application/json", "x-goog-api-key": this.key },
+            body: JSON.stringify({ contents: [{ role: "user", parts }], generationConfig }) });
+        } catch (e) {
+          if (signal && signal.aborted) throw gErr("cancelled");
+          throw gErr("network", String(e && e.message || e));
+        }
+        try { body = await res.json(); } catch { body = null; }
+        if (res.ok) {
+          const cand = body && body.candidates && body.candidates[0];
+          const text = ((cand && cand.content && cand.content.parts) || []).filter(p => !p.thought && typeof p.text === "string").map(p => p.text).join("");
+          if (!text) { lastErr = gErr(cand && cand.finishReason === "SAFETY" ? "blocked" : "empty", "no text in reply"); continue; }
+          this.model = model;
+          return text;
+        }
+        const msg = String(body && body.error && body.error.message || res.status);
+        const reason = JSON.stringify(body && body.error && body.error.details || "");
+        if (res.status === 400 && /thinking/i.test(msg) && this.thinking) {      // this model does not take a thinking level
+          this.thinking = false; return this.call(job, parts, { json, signal });
+        }
+        if ((res.status === 400 && /API_KEY_INVALID|API key not valid/i.test(msg + reason)) || res.status === 401 || res.status === 403)
+          throw gErr("bad_key", msg);
+        if (res.status === 404) { this.skip[job].add(model); lastErr = gErr("model_missing", msg); continue; }
+        if (res.status === 429) { lastErr = gErr("rate_limited", msg, { retryAfter: retrySeconds(body) }); continue; }
+        if (res.status >= 500) { lastErr = gErr("busy", msg); continue; }
+        throw gErr("bad_request", msg);
+      }
+      throw lastErr || gErr("model_missing", "no model available");
+    }
+    async look(image, state, lang, signal) {
+      const data = await blobToBase64(image);
+      const text = await this.call("look", [{ text: lookPrompt(state, lang, true) },
+        { inlineData: { mimeType: image.type || "image/jpeg", data } }], { json: true, signal });
+      return cleanLook(parseJsonReply(text));
+    }
+    async tell(ctx, { onText, signal } = {}) {
+      const t = (await this.call("tell", [{ text: tellPrompt(ctx) }], { signal })).trim();
+      if (onText) onText({ text: t });
+      if (hasDigits(t)) return { rejected: "numbers" };
+      if (t.length > 2000) return { rejected: "length" };
+      return { text: t };
+    }
+    /** A tiny request to check the key works. Resolves true or throws {code}. */
+    async test() { await this.call("tell", [{ text: "Reply with the single word: ready" }]); return true; }
+  }
+
+  const api = { GameMaster, GeminiMaster, MODELS, cleanLook, lookPrompt, tellPrompt, hasDigits, parseJsonReply };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.TMGameMaster = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+/* Saved games. Preferred: the page's private per-person store on claude.ai
+ * (data/users/<id>/<gameId>, readable by nobody else). Fallback: this
+ * browser's localStorage. Last fallback: memory only (says so in the UI). */
+(function (root) {
+  "use strict";
+  const LS_KEY = "tm.games.v1";
+  const MAX_STORY = 80;
+
+  function lsRead() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch { return {}; } }
+  function lsWrite(all) { try { localStorage.setItem(LS_KEY, JSON.stringify(all)); return true; } catch { return false; } }
+
+  class Storage {
+    constructor() { this.kind = "memory"; this.mem = {}; this.db = null; this.uid = null; this.queue = Promise.resolve(); }
+
+    async init() {
+      const use = root.claude && typeof root.claude.use === "function" ? root.claude.use.bind(root.claude) : null;
+      if (use) {
+        try {
+          const [db, user] = await Promise.all([use("db"), use("user")]);
+          const uid = user ? await user.id() : null;
+          if (db && uid) { this.db = db; this.uid = uid; this.kind = "account"; return this; }
+        } catch { /* fall through */ }
+      }
+      try { localStorage.setItem("tm.probe", "1"); localStorage.removeItem("tm.probe"); this.kind = "browser"; } catch { this.kind = "memory"; }
+      return this;
+    }
+
+    col() { return this.db.collection("data/users/" + this.uid); }
+
+    async list() {
+      let games = [];
+      if (this.kind === "account") {
+        try { games = (await this.col().get()).docs.map(d => d.data()); }
+        catch { games = []; }
+      } else if (this.kind === "browser") games = Object.values(lsRead());
+      else games = Object.values(this.mem);
+      return games.filter(g => g && g.id && Array.isArray(g.events)).sort((a, b) => (b.updated || 0) - (a.updated || 0));
+    }
+
+    async load(id) { return (await this.list()).find(g => g.id === id) || null; }
+
+    /** Writes are serialized: one at a time per game, latest state wins. */
+    save(game) {
+      const doc = { ...game, story: (game.story || []).slice(-MAX_STORY), updated: Date.now() };
+      this.queue = this.queue.then(async () => {
+        if (this.kind === "account") {
+          try { await this.col().doc(doc.id).set(JSON.parse(JSON.stringify(doc))); return true; }
+          catch (e) { console.warn("save failed", e && e.code); return false; }
+        }
+        if (this.kind === "browser") { const all = lsRead(); all[doc.id] = doc; return lsWrite(all); }
+        this.mem[doc.id] = doc; return true;
+      });
+      return this.queue;
+    }
+
+    async remove(id) {
+      if (this.kind === "account") { try { await this.col().doc(id).delete(); } catch { /* ignore */ } }
+      else if (this.kind === "browser") { const all = lsRead(); delete all[id]; lsWrite(all); }
+      else delete this.mem[id];
+    }
+  }
+
+  root.TMStorage = Storage;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+/* Medieval music for the table, generated in the browser (Web Audio): free,
+ * offline, no copyright issues. Instruments: plucked lute and harp
+ * (Karplus–Strong strings), recorder, shawm, hurdy-gurdy drone, chanting
+ * choir, war horn, tabor drums, bells. Tunes: Greensleeves and the Dies Irae
+ * chant (both public domain) plus original dances in medieval modes.
+ * The owner can also give any place their own recording (setCustom).
+ * scheduleScene() is pure scheduling against any AudioContext, so the same
+ * code renders offline in tests. */
+(function (root) {
+  "use strict";
+
+  const midi = m => 440 * Math.pow(2, (m - 69) / 12);
+  function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+  // ---------- tunes: [semitones above the scene's root (null = rest), length in 16ths] ----
+  const GREENSLEEVES = [[0, 2], [3, 4], [5, 2], [7, 3], [8, 1], [7, 2], [5, 4], [2, 2], [-2, 3], [0, 1], [2, 2],
+    [3, 4], [0, 2], [0, 3], [-1, 1], [0, 2], [2, 4], [-1, 2], [-5, 4], [0, 2], [3, 4], [5, 2], [7, 3], [8, 1], [7, 2],
+    [5, 4], [2, 2], [-2, 3], [0, 1], [2, 2], [3, 3], [2, 1], [0, 2], [-1, 3], [-3, 1], [-1, 2], [0, 6], [null, 6]];
+  const DIES_IRAE = [[3, 4], [2, 4], [3, 4], [0, 4], [2, 4], [-2, 4], [0, 4], [0, 8], [null, 4],
+    [3, 4], [3, 4], [5, 4], [3, 4], [2, 4], [0, 4], [-2, 4], [2, 4], [3, 4], [2, 4], [0, 4], [0, 8], [null, 12]];
+  const ESTAMPIE = [[0, 2], [3, 2], [7, 2], [3, 2], [5, 2], [7, 2], [9, 2], [7, 2], [5, 2], [3, 2], [2, 2], [3, 2],
+    [5, 2], [3, 2], [2, 2], [-2, 2], [0, 2], [3, 2], [7, 2], [3, 2], [5, 2], [7, 2], [9, 2], [10, 2],
+    [12, 2], [10, 2], [9, 2], [7, 2], [5, 2], [3, 2], [0, 4]];
+  const SHAWM_MARCH = [[0, 2], [4, 2], [7, 2], [4, 2], [5, 2], [4, 2], [2, 2], [0, 2], [2, 2], [4, 2], [5, 2], [7, 2],
+    [4, 2], [2, 2], [0, 4], [7, 2], [9, 2], [10, 2], [9, 2], [7, 2], [5, 2], [4, 2], [5, 2], [7, 2], [4, 2], [2, 2], [4, 2],
+    [0, 4], [null, 4]];
+  const WAYFARER = [[0, 4], [3, 2], [5, 2], [7, 6], [5, 2], [3, 4], [2, 4], [0, 8], [null, 16],
+    [7, 4], [10, 2], [9, 2], [7, 6], [5, 2], [3, 4], [5, 4], [7, 8], [null, 16]];
+  const GREENWOOD = [[7, 6], [8, 2], [7, 4], [5, 4], [3, 8], [null, 8], [3, 4], [5, 4], [7, 4], [3, 4], [2, 8], [0, 8], [null, 16]];
+  const PROCESSION = [[0, 16], [3, 16], [5, 8], [7, 8], [3, 16], [2, 16]];
+  const INCANTATION = [[0, 8], [1, 8], [0, 8], [-2, 8], [0, 16], [null, 8], [3, 8], [1, 8], [0, 16]];
+
+  // ---------- scenes ------------------------------------------------------------------
+  const SCENES = {
+    road:      { bpm: 72, root: 50, prog: [0, 10, 5, 0], scale: "dorian", strings: "lute-arp", tune: WAYFARER, voice: "recorder", oct: 1, drone: 0.012, wind: 0.03 },
+    village:   { bpm: 100, root: 57, prog: [0, 3, 10, 7], scale: "aeolian", strings: "lute-strum", tune: GREENSLEEVES, voice: "recorder", oct: 1, bell: 0.08, crowd: 0.022 },
+    city:      { bpm: 108, root: 55, prog: [0, 10, 5, 0], scale: "mixolydian", strings: "lute-strum", tune: SHAWM_MARCH, voice: "shawm", oct: 1, drum: "march", crowd: 0.05, bell: 0.06 },
+    tavern:    { bpm: 132, root: 50, prog: [0, 10, 0, 7], scale: "dorian", strings: "lute-strum", tune: ESTAMPIE, voice: "recorder", oct: 1, drum: "jig", drone: 0.03, trompette: true, crowd: 0.065 },
+    forest:    { bpm: 60, root: 48, prog: [0, 8, 3, 10], scale: "aeolian", strings: "harp-arp", tune: GREENWOOD, voice: "recorder", oct: 1, birds: true, wind: 0.045 },
+    graveyard: { bpm: 52, root: 50, prog: [0, 0, 10, 0], scale: "dorian", tune: DIES_IRAE, voice: "choir", oct: 0, toll: true, drone: 0.016, wind: 0.04 },
+    inner:     { bpm: 56, root: 50, prog: [0, 8, 3, 10], scale: "aeolian", strings: "harp-arp", tune: PROCESSION, voice: "choir", oct: 0, drum: "timpani", horn: 0.5 },
+    battle:    { bpm: 126, root: 45, prog: [0, 0, 8, 7], scale: "phrygian", strings: "lute-low", drum: "war", horn: 1, drone: 0.025 },
+    mystic:    { bpm: 70, root: 49, prog: [0, 1, 10, 0], scale: "phrygian", tune: INCANTATION, voice: "choir", oct: 0, shimmer: true, drone: 0.02 },
+  };
+  const NAMES = Object.keys(SCENES);
+  const SCALES = { dorian: [0, 2, 3, 5, 7, 9, 10], aeolian: [0, 2, 3, 5, 7, 8, 10], mixolydian: [0, 2, 4, 5, 7, 9, 10],
+    phrygian: [0, 1, 3, 5, 7, 8, 10] };
+  // a chord on a root offset: root, a scale-appropriate third, fifth
+  function triad(sc, off) {
+    const s = SCALES[sc.scale], deg = s.indexOf(((off % 12) + 12) % 12);
+    if (deg < 0) return [off, off + 7];
+    const third = s[(deg + 2) % 7] + (deg + 2 >= 7 ? 12 : 0) - s[deg];
+    return [off, off + third, off + 7];
+  }
+
+  // ---------- instruments ---------------------------------------------------------------
+  function osc(ctx, type, f, t, stop, detune = 0) {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t);
+    if (detune) o.detune.setValueAtTime(detune, t);
+    o.start(t); o.stop(stop); return o;
+  }
+  function gainEnv(ctx, out, t, attack, peak, hold, release) {
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), t + attack);
+    g.gain.setValueAtTime(Math.max(peak, 0.0002), t + attack + Math.max(hold, 0));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + attack + Math.max(hold, 0) + release);
+    g.connect(out); return g;
+  }
+  const noiseCache = new WeakMap();
+  function noise(ctx) {
+    let b = noiseCache.get(ctx);
+    if (!b) {
+      b = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const d = b.getChannelData(0), r = rng(7); for (let i = 0; i < d.length; i++) d[i] = r() * 2 - 1;
+      noiseCache.set(ctx, b);
+    }
+    return b;
+  }
+
+  // Karplus–Strong plucked string, rendered once per pitch and cached.
+  const ksCache = new WeakMap();
+  function stringBuffer(ctx, freq, kind) {
+    let m = ksCache.get(ctx); if (!m) { m = new Map(); ksCache.set(ctx, m); }
+    const key = kind + Math.round(freq * 10);
+    if (m.has(key)) return m.get(key);
+    const sr = ctx.sampleRate, harp = kind === "harp";
+    const len = harp ? 3.2 : 1.8, decay = harp ? 0.9975 : 0.993, N = Math.max(2, Math.round(sr / freq));
+    const total = Math.floor(sr * len), buf = ctx.createBuffer(1, total, sr), d = buf.getChannelData(0);
+    const ring = new Float32Array(N), r = rng(N * 31 + (harp ? 7 : 3));
+    let prev = 0;
+    for (let i = 0; i < N; i++) { const x = r() * 2 - 1; prev = harp ? 0.6 * prev + 0.4 * x : 0.3 * prev + 0.7 * x; ring[i] = prev; }
+    let idx = 0;
+    for (let i = 0; i < total; i++) {
+      const a = ring[idx], b = ring[(idx + 1) % N];
+      d[i] = a; ring[idx] = decay * 0.5 * (a + b); idx = (idx + 1) % N;
+    }
+    m.set(key, buf); return buf;
+  }
+  function pluck(ctx, out, t, freq, vol = 0.18, kind = "lute") {
+    const s = ctx.createBufferSource(); s.buffer = stringBuffer(ctx, freq, kind);
+    const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = kind === "harp" ? 5000 : 3200;
+    const g = ctx.createGain(); g.gain.value = vol;
+    s.connect(f); f.connect(g); g.connect(out); s.start(t); s.stop(t + s.buffer.duration);
+  }
+  function recorder(ctx, out, t, freq, dur, vol = 0.07) {
+    const g = gainEnv(ctx, out, t, 0.05, vol, Math.max(dur - 0.1, 0.02), 0.09), end = t + dur + 0.2;
+    const o = osc(ctx, "sine", freq, t, end), o2 = osc(ctx, "sine", freq * 2, t, end), g2 = ctx.createGain(); g2.gain.value = 0.12;
+    o.connect(g); o2.connect(g2); g2.connect(g);
+    if (dur > 0.35) {                                   // gentle vibrato on held notes
+      const lfo = osc(ctx, "sine", 5.2, t, end), lg = ctx.createGain(); lg.gain.setValueAtTime(0, t);
+      lg.gain.linearRampToValueAtTime(freq * 0.006, t + 0.35); lfo.connect(lg); lg.connect(o.frequency); lg.connect(o2.frequency);
+    }
+    const n = ctx.createBufferSource(); n.buffer = noise(ctx);   // breath
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = freq * 2; bp.Q.value = 3;
+    const ng = gainEnv(ctx, out, t, 0.02, vol * 0.25, 0.04, 0.12);
+    n.connect(bp); bp.connect(ng); n.start(t, (freq % 1.5)); n.stop(t + 0.3);
+  }
+  function shawm(ctx, out, t, freq, dur, vol = 0.05) {
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1400; bp.Q.value = 1.2;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3500;
+    const g = gainEnv(ctx, out, t, 0.03, vol, Math.max(dur - 0.08, 0.02), 0.07);
+    bp.connect(lp); lp.connect(g);
+    osc(ctx, "sawtooth", freq, t, t + dur + 0.15).connect(bp);
+    osc(ctx, "square", freq * 1.003, t, t + dur + 0.15).connect(bp);
+  }
+  function choir(ctx, out, t, freq, dur, vol = 0.11) {
+    const g = gainEnv(ctx, out, t, Math.min(0.45, dur * 0.3), vol, Math.max(dur - 0.5, 0.05), 0.9);
+    const end = t + dur + 1;
+    for (const [fc, q, v] of [[700, 6, 1], [1150, 7, 0.6], [2600, 8, 0.15]]) {      // "ah" formants
+      const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = fc; bp.Q.value = q;
+      const fg = ctx.createGain(); fg.gain.value = v; bp.connect(fg); fg.connect(g);
+      for (const [mul, dt] of [[1, -8], [1, 6], [0.5, 0], [2, 4]]) osc(ctx, "sawtooth", freq * mul, t, end, dt).connect(bp);
+    }
+  }
+  function drone(ctx, out, t, freqs, dur, vol, trompette) {
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 900; bp.Q.value = 0.7;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400;
+    const g = gainEnv(ctx, out, t, 0.25, vol, Math.max(dur - 0.25, 0.05), 0.4);
+    bp.connect(lp); lp.connect(g);
+    for (const f of freqs) osc(ctx, "sawtooth", f, t, t + dur + 0.7, 3).connect(bp);
+    if (trompette) {                                   // the hurdy-gurdy's rhythmic buzz
+      const lfo = osc(ctx, "square", 4.4, t, t + dur + 0.7), lg = ctx.createGain(); lg.gain.value = vol * 0.5;
+      lfo.connect(lg); lg.connect(g.gain);
+    }
+  }
+  function horn(ctx, out, t, freq, dur, vol = 0.07) {
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.setValueAtTime(500, t);
+    lp.frequency.linearRampToValueAtTime(1500, t + 0.12); lp.frequency.linearRampToValueAtTime(1000, t + dur);
+    const g = gainEnv(ctx, out, t, 0.08, vol, Math.max(dur - 0.15, 0.02), 0.25); lp.connect(g);
+    const o = osc(ctx, "sawtooth", freq * 0.97, t, t + dur + 0.4); o.frequency.linearRampToValueAtTime(freq, t + 0.08); o.connect(lp);
+    osc(ctx, "sawtooth", freq * 0.5, t, t + dur + 0.4, 4).connect(lp);
+  }
+  function bell(ctx, out, t, freq, vol = 0.05, len = 2.6) {
+    for (const [ratio, v] of [[1, 1], [2.0, 0.5], [2.76, 0.35], [5.4, 0.12]]) {
+      const g = gainEnv(ctx, out, t, 0.004, vol * v, 0, len / ratio);
+      osc(ctx, "sine", freq * ratio, t, t + len).connect(g);
+    }
+  }
+  function drum(ctx, out, t, kind, vel = 1) {
+    if (kind === "tabor" || kind === "war" || kind === "timp" || kind === "low") {
+      const [f0, f1, len, vol] = { tabor: [220, 150, 0.18, 0.18], war: [95, 50, 0.55, 0.42], low: [140, 70, 0.3, 0.25], timp: [105, 72, 1.3, 0.3] }[kind];
+      const o = osc(ctx, "sine", f0, t, t + len + 0.05); o.frequency.exponentialRampToValueAtTime(f1, t + len * 0.5);
+      const g = ctx.createGain(); g.gain.setValueAtTime(vol * vel, t); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      o.connect(g); g.connect(out);
+    }
+    if (kind !== "timp") {                             // skin / snare buzz
+      const s = ctx.createBufferSource(); s.buffer = noise(ctx);
+      const f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = kind === "war" ? 600 : kind === "snare" ? 2000 : 1300; f.Q.value = 0.8;
+      const len = kind === "war" ? 0.25 : 0.12, vol = { war: 0.16, snare: 0.1, tabor: 0.07, low: 0.06 }[kind] || 0.06;
+      const g = ctx.createGain(); g.gain.setValueAtTime(vol * vel, t); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      s.connect(f); f.connect(g); g.connect(out); s.start(t, (t * 7.3) % 1.5); s.stop(t + len + 0.02);
+    }
+  }
+  function chirp(ctx, out, t, r) {
+    const base = 2300 + r() * 1700;
+    for (let k = 0; k < 2 + Math.floor(r() * 3); k++) {
+      const s = t + k * 0.09, o = osc(ctx, "sine", base, s, s + 0.08);
+      o.frequency.exponentialRampToValueAtTime(base * (1.3 + r() * 0.4), s + 0.06);
+      const g = gainEnv(ctx, out, s, 0.01, 0.016, 0, 0.065); o.connect(g);
+    }
+  }
+
+  // Continuous beds (wind, crowd) — started once per scene.
+  function startBeds(ctx, out, sc, t) {
+    const beds = [];
+    const bed = (vol, type, freq, q, lfoRate) => {
+      const s = ctx.createBufferSource(); s.buffer = noise(ctx); s.loop = true;
+      const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q;
+      const g = ctx.createGain(); g.gain.value = vol;
+      const lfo = ctx.createOscillator(); lfo.frequency.value = lfoRate;
+      const lg = ctx.createGain(); lg.gain.value = vol * 0.6; lfo.connect(lg); lg.connect(g.gain);
+      s.connect(f); f.connect(g); g.connect(out); s.start(t); lfo.start(t); beds.push(s, lfo);
+    };
+    if (sc.wind) bed(sc.wind, "bandpass", 480, 0.6, 0.07);
+    if (sc.crowd) bed(sc.crowd, "bandpass", 850, 1.3, 0.35);
+    return beds;
+  }
+
+  // ---------- the composer ------------------------------------------------------------
+  function scheduleScene(ctx, out, name, t0, t1, state) {
+    const sc = SCENES[name], step = 60 / sc.bpm / 4;
+    const r = state.rng || (state.rng = rng(name.length * 977 + 13));
+    if (state.next == null) state.next = t0;
+    if (state.n == null) { state.n = 0; state.mel = 0; state.melAt = 4; }
+    const R = sc.root;
+    while (state.next < t1) {
+      const t = state.next, n = state.n, bar = Math.floor(n / 16), s = n % 16, barLen = step * 16;
+      const chordRoot = sc.prog[bar % sc.prog.length], tri = triad(sc, chordRoot);
+
+      if (s === 0 && sc.drone) drone(ctx, out, t, [midi(R - 12), midi(R - 5)], barLen, sc.drone, sc.trompette);
+      if (sc.strings === "lute-arp" && s % 2 === 0) {
+        const pat = [0, 1, 2, 1, 0, 2, 1, 2][(s / 2) % 8];
+        pluck(ctx, out, t + (r() - 0.5) * 0.012, midi(R + tri[pat % tri.length] + (pat === 2 && s % 8 === 4 ? 12 : 0)), s % 8 === 0 ? 0.2 : 0.13);
+      }
+      if (sc.strings === "harp-arp" && s % 2 === 0) {
+        const idx = (s / 2) % 8, notes = [...tri, ...tri.map(x => x + 12), tri[0] + 24, tri[1] + 12];
+        pluck(ctx, out, t, midi(R + notes[idx]), 0.14, "harp");
+      }
+      if (sc.strings === "lute-strum" && (s === 0 || s === 6 || s === 8 || s === 12)) {
+        tri.forEach((x, i) => pluck(ctx, out, t + i * 0.018, midi(R + x), s === 0 ? 0.14 : 0.1));
+        if (s === 0) pluck(ctx, out, t, midi(R + tri[0] - 12), 0.16);
+      }
+      if (sc.strings === "lute-low" && s % 2 === 0) pluck(ctx, out, t, midi(R + chordRoot - 12 + (s % 8 === 6 ? 7 : 0)), 0.22);
+
+      if (sc.drum === "march") { if (s === 0 || s === 8) drum(ctx, out, t, "low", 0.8); if (s % 4 === 2 || s === 14) drum(ctx, out, t, "tabor", 0.7); }
+      if (sc.drum === "jig") { if (s % 6 === 0) drum(ctx, out, t, "low", 0.8); if (s % 2 === 1) drum(ctx, out, t, "tabor", 0.45); }
+      if (sc.drum === "timpani" && s === 0 && bar % 2 === 0) drum(ctx, out, t, "timp", 0.8);
+      if (sc.drum === "war") {
+        if (s === 0 || s === 3 || s === 8 || s === 11) drum(ctx, out, t, "war", s === 0 ? 1 : 0.75);
+        if (s % 2 === 0) drum(ctx, out, t, "tabor", 0.5);
+        if (s === 12 || s === 14) drum(ctx, out, t, "snare", 0.8);
+      }
+      if (sc.horn && s === 0 && bar % 4 === (name === "battle" ? 1 : 3))  // horn call
+        [[0, 3], [7, 3], [12, 8]].reduce((at, [o, d]) => { horn(ctx, out, at, midi(R + o), d * step * 0.95, 0.07 * sc.horn); return at + d * step; }, t);
+      if (sc.toll && s === 0 && bar % 2 === 0) bell(ctx, out, t, midi(R - 12), 0.07, 5);
+      if (sc.bell && s === 8 && r() < sc.bell * 4) bell(ctx, out, t, midi(R + 24 + tri[Math.floor(r() * tri.length)]), 0.03);
+      if (sc.shimmer && s % 4 === 0 && r() < 0.5) bell(ctx, out, t, midi(R + 24 + tri[Math.floor(r() * tri.length)]), 0.025, 1.6);
+      if (sc.birds && s === 0 && r() < 0.55) chirp(ctx, out, t + r() * barLen * 0.8, r);
+
+      if (sc.tune && n >= state.melAt) {                // the melody
+        const [off, len] = sc.tune[state.mel % sc.tune.length];
+        if (off != null) {
+          const f = midi(R + off + 12 * (sc.oct || 0) + 12), dur = len * step;
+          if (sc.voice === "recorder") recorder(ctx, out, t, f, dur * 0.95);
+          else if (sc.voice === "shawm") shawm(ctx, out, t, f, dur * 0.9);
+          else if (sc.voice === "choir") choir(ctx, out, t, f / 2, dur);
+        }
+        state.mel += 1; state.melAt = n + len;
+      }
+      state.n = n + 1; state.next = t + step;
+    }
+  }
+
+  // ---------- stingers -----------------------------------------------------------------
+  function sting(ctx, out, kind, t) {
+    if (kind === "victory") {
+      [[60, 0.16], [67, 0.16], [72, 0.7]].reduce((at, [m, d]) => { horn(ctx, out, at, midi(m), d, 0.09); horn(ctx, out, at, midi(m - 12), d, 0.05); return at + d; }, t);
+      drum(ctx, out, t + 0.32, "timp", 1); bell(ctx, out, t + 0.32, midi(84), 0.04);
+    } else if (kind === "defeat") {
+      [[62, 0.6], [61, 0.6], [57, 1.4]].reduce((at, [m, d]) => { choir(ctx, out, at, midi(m - 12), d, 0.1); return at + d; }, t);
+      bell(ctx, out, t, midi(38), 0.07, 4);
+    } else if (kind === "card") {
+      [72, 76, 79, 84, 88].forEach((m, i) => pluck(ctx, out, t + i * 0.055, midi(m), 0.3, "harp"));
+    }
+  }
+
+  const LOOP_IN = 0.25;   // seconds into a built-in track where the loop window begins
+  // Where the music really starts in a decoded file (AAC/MP3 decoders add a little silence).
+  function findStart(buf) {
+    const sr = buf.sampleRate, limit = Math.min(buf.length, Math.floor(sr * 0.3));
+    const chans = Array.from({ length: buf.numberOfChannels }, (_, c) => buf.getChannelData(c));
+    for (let i = 0; i < limit; i++) for (const d of chans) if (Math.abs(d[i]) > 1e-4) return i / sr;
+    return 0;
+  }
+
+  // ---------- the live player ----------------------------------------------------------
+  class Music {
+    constructor(storage) {
+      this.ctx = null; this.scene = null; this.enabled = storage.get("music", true);
+      this.volume = storage.get("musicVolume", 0.5); this.storage = storage;
+      this.ducked = false; this.timer = null; this.layers = []; this.custom = {};   // scene -> {buffer, start?, loop?}
+      this.tracks = {};          // built-in recordings: scene -> {src, loop}
+      this.decoded = {};         // scene -> {buffer, start, loop}
+      this.loading = {};         // scene -> Promise
+    }
+    /** Built-in recordings shipped next to the page (fetched and decoded on first use). */
+    setTracks(meta) { this.tracks = meta || {}; }
+    load(scene) {
+      const m = this.tracks[scene];
+      if (!m || !this.ctx) return Promise.resolve(null);
+      if (this.decoded[scene]) return Promise.resolve(this.decoded[scene]);
+      if (!this.loading[scene]) {
+        this.loading[scene] = (async () => {
+          const res = await fetch(m.src);
+          if (!res.ok) throw new Error("track " + res.status);
+          const buffer = await this.ctx.decodeAudioData(await res.arrayBuffer());
+          // Each file is its loop followed by 0.5 s of its own beginning, so any window
+          // [a, a + loop] with a inside that half second loops seamlessly — whatever
+          // extra samples a browser's decoder adds at the start.
+          const start = LOOP_IN;
+          const loop = Math.min(m.loop, buffer.duration - start - 0.01);
+          return (this.decoded[scene] = { buffer, start, loop });
+        })().catch(e => { delete this.loading[scene]; this.failed = (this.failed || 0) + 1; return null; });
+      }
+      return this.loading[scene];
+    }
+    /** Fetch the other tracks quietly after the first one plays. */
+    async preload() {
+      for (const s of Object.keys(this.tracks)) { if (!this.ctx) return; await this.load(s); }
+    }
+    available() { return !!(root.AudioContext || root.webkitAudioContext); }
+    unlock() {                                          // first call must come from a tap
+      if (!this.available()) return false;
+      if (!this.ctx) {
+        const C = root.AudioContext || root.webkitAudioContext;
+        try { this.ctx = new C(); } catch { return false; }
+        const ctx = this.ctx;
+        this.master = ctx.createGain(); this.master.gain.value = 0;
+        const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4;
+        this.master.connect(comp); comp.connect(ctx.destination);
+        const ir = ctx.createBuffer(2, ctx.sampleRate * 2.4, ctx.sampleRate), r = rng(3);   // stone-hall reverb
+        for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < d.length; i++) d[i] = (r() * 2 - 1) * Math.pow(1 - i / d.length, 2.6); }
+        this.verb = ctx.createConvolver(); this.verb.buffer = ir;
+        const wet = ctx.createGain(); wet.gain.value = 0.4; this.verb.connect(wet); wet.connect(this.master);
+        this.applyVolume();
+        if (this.onReady) this.onReady();
+      }
+      if (this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
+      return true;
+    }
+    applyVolume() {
+      if (!this.ctx) return;
+      const v = this.enabled ? this.volume * (this.ducked ? 0.35 : 1) : 0;
+      this.master.gain.setTargetAtTime(v, this.ctx.currentTime, 0.4);
+    }
+    setEnabled(on) { this.enabled = on; this.storage.set("music", on); if (on) { this.unlock(); this.restart(); } this.applyVolume(); }
+    setVolume(v) { this.volume = v; this.storage.set("musicVolume", v); this.applyVolume(); }
+    duck(on) { if (this.ducked !== on) { this.ducked = on; this.applyVolume(); } }
+
+    /** Give a scene its own recording (an ArrayBuffer of an audio file). */
+    // knownLoop: the loop length of a prepared track (its loop + 0.5 s of its start);
+    // when the file matches it, it loops seamlessly like a built-in one.
+    async setCustom(scene, arrayBuffer, knownLoop) {
+      if (!this.ctx) throw new Error("music not started yet");
+      const buf = await this.ctx.decodeAudioData(arrayBuffer.slice(0));
+      const prepared = knownLoop && Math.abs(buf.duration - (knownLoop + 0.5)) < 0.35;
+      this.custom[scene] = prepared ? { buffer: buf, start: LOOP_IN, loop: Math.min(knownLoop, buf.duration - LOOP_IN - 0.01) } : { buffer: buf };
+      if (this.scene === scene) this.restart();
+      return buf.duration;
+    }
+    clearCustom(scene) { delete this.custom[scene]; if (this.scene === scene) this.restart(); }
+
+    play(name) {
+      if (!SCENES[name] || name === this.scene) return;
+      this.scene = name; this.restart();
+    }
+    restart() {
+      if (!this.ctx || !this.enabled || !this.scene) return;
+      const ctx = this.ctx, now = ctx.currentTime;
+      for (const l of this.layers) {
+        l.gain.gain.setTargetAtTime(0, now, 0.6);
+        setTimeout(() => { try { l.beds.forEach(b => b.stop()); l.gain.disconnect(); } catch { /* gone */ } }, 3500);
+      }
+      const gain = ctx.createGain(); gain.gain.setValueAtTime(0.0001, now); gain.gain.setTargetAtTime(1, now, 0.7);
+      gain.connect(this.master);
+      const layer = { name: this.scene, gain, state: { next: now + 0.15 }, beds: [] };
+      const own = this.custom[this.scene], built = this.decoded[this.scene];
+      if (own) {                                        // the owner's per-device recording, looped
+        const s = ctx.createBufferSource(); s.buffer = own.buffer; s.loop = true;
+        if (own.loop) { s.loopStart = own.start; s.loopEnd = own.start + own.loop; }
+        s.connect(gain); s.start(now + 0.1);
+        layer.beds.push(s); layer.recorded = true;
+      } else if (built) {                               // a built-in recording, looped seamlessly
+        const s = ctx.createBufferSource(); s.buffer = built.buffer; s.loop = true;
+        s.loopStart = built.start; s.loopEnd = built.start + built.loop;
+        s.connect(gain); s.start(now + 0.1, 0);
+        layer.beds.push(s); layer.recorded = true;
+      } else if (this.tracks[this.scene]) {             // not loaded yet: fetch it, then start
+        layer.recorded = true; layer.waiting = true;
+        const want = this.scene;
+        this.load(want).then(d => {
+          if (this.scene !== want || !this.layers[0] || !this.layers[0].waiting) return;
+          if (d) this.restart(); else { delete this.tracks[want]; this.restart(); }   // failed: built-in synth
+        });
+      } else {
+        gain.connect(this.verb);
+        layer.beds = startBeds(ctx, gain, SCENES[this.scene], now);
+      }
+      this.layers = [layer];
+      clearInterval(this.timer);
+      this.timer = null;
+      if (!layer.recorded) { this.timer = setInterval(() => this.tick(), 100); this.tick(); }
+    }
+    tick() {
+      const l = this.layers[0];
+      if (!l || l.recorded || !this.ctx || this.ctx.state !== "running") return;
+      scheduleScene(this.ctx, l.gain, l.name, this.ctx.currentTime, this.ctx.currentTime + 0.4, l.state);
+    }
+    sting(kind) {
+      if (!this.ctx || !this.enabled) return;
+      const g = this.ctx.createGain(); g.gain.value = 0.9; g.connect(this.master); g.connect(this.verb);
+      sting(this.ctx, g, kind, this.ctx.currentTime + 0.05);
+    }
+    stop() {
+      clearInterval(this.timer); this.timer = null;
+      for (const l of this.layers) { try { l.beds.forEach(b => b.stop()); l.gain.disconnect(); } catch { /* gone */ } }
+      this.layers = []; this.scene = null;
+    }
+  }
+
+  const api = { Music, SCENES, NAMES, scheduleScene, startBeds, sting, stringBuffer, findStart, LOOP_IN };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.TMMusic = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+/* Live eye: the phone camera watches a reading spot next to the board.
+ * Hands move -> the picture settles -> if something changed since the last
+ * look, take one sharp snapshot and hand it to the game master.
+ * The camera picture never leaves the phone except those snapshots. */
+(function (root) {
+  "use strict";
+
+  const W = 160, H = 120;               // small grey frames for motion checks (a die is ~50-100 pixels)
+
+  // How many pixels differ by more than `level`, after removing an overall
+  // brightness shift (a cloud or a lamp should not count as a change).
+  function changed(a, b, level = 24) {
+    let ma = 0, mb = 0;
+    for (let i = 0; i < a.length; i++) { ma += a[i]; mb += b[i]; }
+    const shift = (ma - mb) / a.length;
+    let n = 0;
+    for (let i = 0; i < a.length; i++) if (Math.abs(a[i] - b[i] - shift) > level) n++;
+    return n;
+  }
+  const brightness = a => { let s = 0; for (let i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
+
+  /** Decides when to look. feed() takes one grey frame and the time in ms and
+   *  returns "look" when a snapshot should be taken, otherwise null. */
+  class StillnessWatch {
+    constructor(o = {}) {
+      // counts of changed pixels in a 160x120 frame
+      this.moveAt = o.moveAt ?? 60;       // more than this between frames = hands or dice moving
+      this.stillAt = o.stillAt ?? 15;     // at most this = settled (sensor noise)
+      this.stillMs = o.stillMs ?? 1100;   // settled this long = done moving
+      this.changeAt = o.changeAt ?? 40;   // changed vs. the last look by more = worth looking again
+      this.reset();
+    }
+    reset() { this.prev = null; this.base = null; this.phase = "calm"; this.stillSince = 0; this.status = "calm"; }
+    /** Treat the current picture as already seen (after a manual look). */
+    seen(frame) { this.base = frame; }
+    feed(frame, now) {
+      const prev = this.prev; this.prev = frame;
+      if (!prev) { this.base = this.base || frame; return null; }
+      if (brightness(frame) < 18) { this.status = "dark"; return null; }
+      const d = changed(frame, prev);
+      if (d > this.moveAt) { this.phase = "moving"; this.stillSince = 0; this.status = "moving"; return null; }
+      if (this.phase !== "moving") { this.status = "calm"; return null; }
+      if (d > this.stillAt) { this.stillSince = 0; return null; }
+      if (!this.stillSince) this.stillSince = now;
+      if (now - this.stillSince < this.stillMs) { this.status = "settling"; return null; }
+      this.phase = "calm"; this.status = "calm";
+      if (this.base && changed(frame, this.base) < this.changeAt) return null;   // put back as it was
+      this.base = frame;
+      return "look";
+    }
+  }
+
+  /** The camera itself (browser only). */
+  class LiveEye {
+    constructor({ onLook, onStatus } = {}) {
+      this.onLook = onLook || (() => {}); this.onStatus = onStatus || (() => {});
+      this.watch = new StillnessWatch(); this.stream = null; this.timer = null; this.lock = null;
+      this.small = null; this.video = null;
+      this.onVisible = () => { if (document.visibilityState === "visible" && this.stream) this.keepAwake(); };
+    }
+    static supported() { return !!(root.navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia); }
+    get running() { return !!this.stream; }
+
+    async start(video) {
+      if (this.stream) return;
+      this.video = video;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: false,
+        video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } } });
+      this.stream = stream;
+      video.setAttribute("playsinline", ""); video.muted = true; video.srcObject = stream;
+      try { await video.play(); } catch { /* starts on its own once visible */ }
+      this.small = document.createElement("canvas"); this.small.width = W; this.small.height = H;
+      this.sctx = this.small.getContext("2d", { willReadFrequently: true });
+      this.watch.reset();
+      this.timer = setInterval(() => this.tick(), 200);
+      this.keepAwake();
+      document.addEventListener("visibilitychange", this.onVisible);
+    }
+    stop() {
+      clearInterval(this.timer); this.timer = null;
+      if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+      this.stream = null;
+      if (this.video) this.video.srcObject = null;
+      if (this.lock) { this.lock.release().catch(() => {}); this.lock = null; }
+      document.removeEventListener("visibilitychange", this.onVisible);
+    }
+    async keepAwake() {                 // keep the screen on while watching (iOS 16.4+)
+      try { if (navigator.wakeLock) this.lock = await navigator.wakeLock.request("screen"); } catch { /* not allowed: fine */ }
+    }
+    grey() {
+      const v = this.video;
+      if (!v || v.readyState < 2 || !v.videoWidth) return null;
+      this.sctx.drawImage(v, 0, 0, W, H);
+      const px = this.sctx.getImageData(0, 0, W, H).data, g = new Uint8Array(W * H);
+      for (let i = 0, j = 0; j < g.length; i += 4, j++) g[j] = (px[i] * 77 + px[i + 1] * 150 + px[i + 2] * 29) >> 8;
+      return g;
+    }
+    tick() {
+      const g = this.grey();
+      if (!g) return;
+      const verdict = this.watch.feed(g, Date.now());
+      this.onStatus(this.watch.status);
+      if (verdict === "look") this.snap().then(b => b && this.onLook(b, false));
+    }
+    /** A sharp still of the whole picture, at most 1600 px wide, as JPEG. */
+    async snap() {
+      const v = this.video;
+      if (!v || !v.videoWidth) return null;
+      const scale = Math.min(1, 1600 / Math.max(v.videoWidth, v.videoHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(v.videoWidth * scale); c.height = Math.round(v.videoHeight * scale);
+      c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+      return new Promise(ok => c.toBlob(b => ok(b), "image/jpeg", 0.85));
+    }
+    async lookNow() {
+      const b = await this.snap();
+      const g = this.grey(); if (g) this.watch.seen(g);
+      if (b) this.onLook(b, true);
+    }
+  }
+
+  const api = { StillnessWatch, LiveEye, changed, W, H };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.TMLive = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+
+/* Table Narrator — phone app controller. Everything runs in the page; the only
+ * thing that leaves the phone is a photo or a story request to Claude, made on
+ * the viewer's own claude.ai account when they tap. */
+(function () {
+  "use strict";
+  const { Session, enemyTotal, playerTotal } = window.TMEngine;
+  const { Narrator } = window.TMNarration;
+  const { GameMaster, GeminiMaster } = window.TMGameMaster;
+  const { LiveEye } = window.TMLive;
+  const PLACES = ["road", "village", "city", "tavern", "forest", "graveyard", "inner"];
+  const DATA = window.TM_DATA;           // {ui: {he, ru}, narration: {he, ru}, tracks, loops?, site?}
+  const SITE = !!DATA.site;              // the stand-alone site (live camera + Google key) rather than claude.ai
+  const LOOPS = { ...Object.fromEntries(Object.entries(DATA.tracks || {}).map(([k, v]) => [k, v.loop])), ...(DATA.loops || {}) };
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const prefs = {
+    get(k, d) { try { const v = localStorage.getItem("tm." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("tm." + k, JSON.stringify(v)); } catch { /* private mode */ } },
+  };
+  const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+
+  let lang = "he", L = DATA.ui.he;
+  let storage = null, gm = null, gmBlocked = null;   // gmBlocked: ui key explaining why the GM is off
+  let game = null, session = null, narrator = null;
+  let setupPlayers = [];
+  let pendingFacts = [];                             // confirmed cues waiting for the storyteller
+  let telling = null;                                // AbortController of the running story call
+  let lastLine = null, lastActor = null, rerollMode = false, combatArmour = false, pendingCombatPlayer = null;
+  const Live = { eye: null, busy: false, queued: null, lastLookAt: 0, waitUntil: 0, timer: null, ctl: null,
+    turn: null, lastCard: null, pending: null, battleDice: [] };
+
+  // ---------- strings ---------------------------------------------------------
+  const t = (k, vars = {}) => String(L[SITE && L[k + "_site"] != null ? k + "_site" : k] ?? k).replace(/\{(\w+)\}/g, (_, n) => vars[n] ?? "");
+  function setLang(l) {
+    lang = l; L = DATA.ui[l];
+    document.documentElement.lang = l;
+    document.documentElement.dir = l === "he" ? "rtl" : "ltr";
+    $$("[data-t]").forEach(el => { el.textContent = t(el.dataset.t); });
+    $$("[data-t-label]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.tLabel)); el.title = t(el.dataset.tLabel); });
+    Speech.lang = l; refreshVoices();
+  }
+
+  function show(name) {
+    $$(".screen").forEach(s => { s.hidden = s.id !== "screen-" + name; });
+    window.scrollTo(0, 0);
+    if (name === "home") { Speech.stopAll(); music.stop(); if (telling) telling.abort(); if (Live.eye) liveStop(); renderSaved(); renderKeyBox(); }
+  }
+  let toastTimer;
+  function toast(msg) {
+    const el = $("#toast"); el.textContent = msg; el.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 2400);
+  }
+  const showError = msg => { $("#table-error").textContent = msg || ""; };
+
+  // ---------- music ---------------------------------------------------------------
+  const music = new window.TMMusic.Music(prefs);
+  music.setTracks(DATA.tracks);
+  const MUSIC_SCENES = [...PLACES, "battle", "mystic"];
+  // The owner's own recordings live in this device's IndexedDB (they never leave it).
+  const OwnMusic = {
+    db: null,
+    async open() {
+      if (this.db) return this.db;
+      this.db = await new Promise((ok, bad) => {
+        try {
+          const req = indexedDB.open("tm-music", 1);
+          req.onupgradeneeded = () => req.result.createObjectStore("tracks", { keyPath: "scene" });
+          req.onsuccess = () => ok(req.result); req.onerror = () => bad(req.error);
+        } catch (e) { bad(e); }
+      });
+      return this.db;
+    },
+    async tx(mode, fn) {
+      const db = await this.open();
+      return new Promise((ok, bad) => {
+        const t = db.transaction("tracks", mode), r = fn(t.objectStore("tracks"));
+        t.oncomplete = () => ok(r && r.result); t.onerror = () => bad(t.error);
+      });
+    },
+    all() { return this.tx("readonly", s => s.getAll()); },
+    put(scene, name, data) { return this.tx("readwrite", s => s.put({ scene, name, data })); },
+    del(scene) { return this.tx("readwrite", s => s.delete(scene)); },
+  };
+  const ownNames = {};                                   // scene -> file name, for the settings list
+  music.onReady = async () => {
+    setTimeout(() => music.preload(), 4000);
+    try {
+      for (const tr of (await OwnMusic.all()) || []) {
+        try { await music.setCustom(tr.scene, tr.data, LOOPS[tr.scene]); ownNames[tr.scene] = tr.name; } catch { /* unreadable file: skip */ }
+      }
+    } catch { /* no IndexedDB here */ }
+    renderOwnMusic();
+  };
+  function renderOwnMusic() {
+    const ul = $("#own-music"); if (!ul) return;
+    ul.textContent = "";
+    MUSIC_SCENES.forEach(scene => {
+      const li = document.createElement("li");
+      li.innerHTML = `<div class="om-name"><b></b><span class="om-file"></span></div>
+        <label class="btn quiet om-pick"><span></span><input type="file" accept="audio/*"></label>
+        <button class="btn om-del" hidden></button>`;
+      $("b", li).textContent = t("scene_" + scene);
+      $(".om-file", li).textContent = ownNames[scene] || t("builtin_music");
+      $(".om-pick span", li).textContent = t("choose_file");
+      const input = $("input", li); input.id = "om-" + scene; input.setAttribute("aria-label", `${t("choose_file")}: ${t("scene_" + scene)}`);
+      input.onchange = async e => {
+        const f = e.target.files[0]; e.target.value = "";
+        if (!f) return;
+        $(".om-file", li).textContent = t("loading_file");
+        try {
+          music.unlock();
+          const data = await f.arrayBuffer();
+          await music.setCustom(scene, data, LOOPS[scene]);
+          ownNames[scene] = f.name;
+          try { await OwnMusic.put(scene, f.name, data); $(".om-file", li).textContent = f.name; }
+          catch { $(".om-file", li).textContent = f.name + " · " + t("not_saved_device"); }
+          renderOwnMusic(); updateMusic();
+        } catch { $(".om-file", li).textContent = t("file_failed"); }
+      };
+      const del = $(".om-del", li); del.hidden = !ownNames[scene]; del.textContent = t("remove");
+      del.onclick = async () => {
+        music.clearCustom(scene); delete ownNames[scene];
+        try { await OwnMusic.del(scene); } catch { /* ignore */ }
+        renderOwnMusic();
+      };
+      ul.append(li);
+    });
+  }
+  // Several files at once: each goes to the place its name says (road.mp3, Tavern.mp3, "Inner region.mp3"…).
+  const PACK_NAMES = { travel: "road", road: "road", village: "village", city: "city", tavern: "tavern", forest: "forest",
+    graveyard: "graveyard", inner: "inner", "inner region": "inner", battle: "battle", fight: "battle", mystic: "mystic", magic: "mystic" };
+  const sceneForFile = name => PACK_NAMES[String(name).toLowerCase().replace(/(\.[a-z0-9]+)+$/, "").replace(/[_-]+/g, " ").trim()] || null;
+  $("#music-pack").addEventListener("change", async e => {
+    const files = [...e.target.files]; e.target.value = "";
+    music.unlock();
+    let n = 0;
+    for (const f of files) {
+      const scene = sceneForFile(f.name);
+      if (!scene) continue;
+      try {
+        const data = await f.arrayBuffer();
+        await music.setCustom(scene, data, LOOPS[scene]);
+        ownNames[scene] = f.name; n++;
+        try { await OwnMusic.put(scene, f.name, data); } catch { /* kept for this visit only */ }
+      } catch { /* not a sound file */ }
+    }
+    renderOwnMusic(); updateMusic();
+    toast(t("music_pack_done", { n }));
+  });
+  function currentScene() {
+    const c = session && session.state.combat;
+    if (c && c.phase !== "resolved") return c.type === "craft" ? "mystic" : "battle";
+    return (game && PLACES.includes(game.scene)) ? game.scene : "road";
+  }
+  function updateMusic() { if (session && !$("#screen-table").hidden) music.play(currentScene()); }
+  function renderMusicButton() {
+    const b = $("#btn-music");
+    b.setAttribute("aria-pressed", String(music.enabled));
+    b.setAttribute("aria-label", t(music.enabled ? "music_off" : "music_on"));
+    b.title = b.getAttribute("aria-label");
+    b.classList.toggle("off", !music.enabled);
+  }
+
+  // ---------- speech ------------------------------------------------------------
+  // iPhones only let a page speak after a tap has "unlocked" speech, may load
+  // their voice list late, and sometimes never fire 'end'. All three are handled.
+  const Speech = (() => {
+    const synth = window.speechSynthesis || null;
+    const PREFIX = { he: ["he", "iw"], ru: ["ru"] };
+    const LOCALE = { he: "he-IL", ru: "ru-RU" };
+    const S = { lang: "he", rate: prefs.get("rate", 0.95), muted: prefs.get("muted", false), paused: false,
+      voiceURI: null, queue: [], speaking: false, current: null, unlocked: false, lastError: "", watchdog: null };
+    S.available = !!synth && typeof window.SpeechSynthesisUtterance === "function";
+    S.allVoices = () => { try { return synth ? synth.getVoices() : []; } catch { return []; } };
+    S.voices = () => S.allVoices().filter(v => PREFIX[S.lang].some(p => String(v.lang).toLowerCase().replace("_", "-").startsWith(p)));
+    // Rank voices by how human they sound: neural / natural / premium voices first
+    // (Edge "Online (Natural)", Apple "Premium"/"Enhanced", Google network voices), robotic ones last.
+    const quality = v => {
+      const n = String(v.name);
+      if (/Natural|Neural/i.test(n)) return 4;
+      if (/Premium|Siri/i.test(n)) return 3;
+      if (/Enhanced|Google|Online/i.test(n)) return 2;
+      return v.localService ? 1 : 0;
+    };
+    S.ranked = () => S.voices().slice().sort((a, b) => quality(b) - quality(a));
+    S.voice = () => { const vs = S.ranked(); return vs.find(v => v.voiceURI === S.voiceURI) || vs[0] || null; };
+    S.isNatural = v => !!v && quality(v) >= 3;
+    S.has = () => !!S.voice();
+    // Called from inside a tap: a silent utterance unlocks speech for the rest of the visit.
+    S.unlock = () => {
+      if (!S.available || S.unlocked) return;
+      try {
+        const u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0; u.lang = LOCALE[S.lang];
+        synth.speak(u);
+        S.unlocked = true;
+        setTimeout(refreshVoices, 300);
+      } catch (e) { S.lastError = String(e && e.message || e); }
+    };
+    S.enqueue = line => {
+      if (!S.available || S.muted) return;          // no matching voice is fine: iOS picks one by language
+      if (line.interruptible) S.queue = S.queue.filter(l => !l.interruptible);
+      (line.text.match(/[^.!?…]+[.!?…]*/g) || [line.text]).map(x => x.trim()).filter(Boolean)
+        .forEach(text => S.queue.push({ ...line, text }));
+      S.next();
+    };
+    const done = () => { clearTimeout(S.watchdog); S.speaking = false; S.current = null; S.next(); if (!S.speaking) music.duck(false); };
+    S.next = () => {
+      if (S.speaking || S.paused || !S.queue.length) return;
+      const line = S.queue.shift();
+      let u;
+      try { u = new SpeechSynthesisUtterance(line.text); } catch (e) { S.lastError = String(e); return; }
+      const v = S.voice();
+      u.lang = v ? v.lang : LOCALE[S.lang];
+      if (v) u.voice = v;
+      // the storyteller reads a little slower and lower than the rules lines
+      u.rate = line.story ? S.rate * 0.92 : S.rate;
+      u.pitch = line.story ? 0.9 : 1;
+      u.onend = done;
+      u.onerror = e => { S.lastError = (e && e.error) || "error"; done(); };
+      S.speaking = true; S.current = line; music.duck(true);
+      try { synth.speak(u); } catch (e) { S.lastError = String(e); done(); return; }
+      // some iOS versions never fire 'end': move on after a generous estimate
+      clearTimeout(S.watchdog);
+      S.watchdog = setTimeout(() => { if (S.current === line) done(); }, 4000 + line.text.length * 130 / S.rate);
+    };
+    S.dropSeq = seq => { S.queue = S.queue.filter(l => l.seq < seq); if (S.current && S.current.seq >= seq && synth) synth.cancel(); };
+    S.pause = () => { S.paused = true; if (synth) synth.pause(); };
+    S.resume = () => { S.paused = false; if (synth) { synth.resume(); S.next(); } };
+    S.stopAll = () => { S.queue = []; clearTimeout(S.watchdog); if (synth) synth.cancel(); S.speaking = false; S.current = null; music.duck(false); };
+    S.test = sample => {          // must run inside a tap
+      S.unlock();
+      if (!S.available) return;
+      S.stopAll();
+      S.enqueue({ text: sample, seq: Infinity, interruptible: false, story: true });
+    };
+    if (synth) {
+      try { synth.addEventListener("voiceschanged", () => refreshVoices()); } catch { synth.onvoiceschanged = () => refreshVoices(); }
+    }
+    const unlockAll = () => { S.unlock(); if (music.enabled && music.unlock()) updateMusic(); };
+    for (const ev of ["pointerdown", "touchend", "click", "keydown"]) document.addEventListener(ev, unlockAll, { capture: true, passive: true });
+    return S;
+  })();
+
+  const PLATFORM = (() => {
+    const ua = navigator.userAgent || "";
+    if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return "ios";
+    if (/Android/.test(ua)) return "android";
+    if (/Windows/.test(ua)) return "windows";
+    if (/Macintosh|Mac OS X/.test(ua)) return "mac";
+    return "other";
+  })();
+  function voiceStatus() {
+    if (!Speech.available) return t("no_speech");
+    const v = Speech.voice();
+    return t("voice_status", { n: Speech.voices().length, voice: v ? v.name : t("voice_auto"), all: Speech.allVoices().length })
+      + (Speech.lastError ? ` (${Speech.lastError})` : "");
+  }
+  function refreshVoices() {
+    Speech.voiceURI = prefs.get("voice." + lang, null);
+    const sel = $("#set-voice"); sel.textContent = "";
+    const auto = document.createElement("option"); auto.value = ""; auto.textContent = t("voice_auto"); sel.append(auto);
+    Speech.ranked().forEach(v => {
+      const o = document.createElement("option");
+      o.value = v.voiceURI; o.textContent = v.name; o.selected = v.voiceURI === Speech.voiceURI; sel.append(o);
+    });
+    const warn = $("#voice-warning");
+    if (!Speech.available) { warn.hidden = false; $("#voice-warning-text").textContent = t("no_speech"); }
+    else if (!Speech.has() && Speech.allVoices().length) { warn.hidden = false; $("#voice-warning-text").textContent = t("no_voice_" + PLATFORM); }
+    else warn.hidden = true;
+    $("#voice-status").textContent = voiceStatus();
+    $("#voice-tip").textContent = t("voice_tip_" + PLATFORM);
+    const best = Speech.voice();
+    $("#voice-natural").hidden = !best || Speech.isNatural(best);
+  }
+  function testVoice() {
+    Speech.test(t("voice_sample"));
+    setTimeout(() => { refreshVoices(); $("#voice-status").textContent = voiceStatus(); }, 600);
+  }
+
+  // ---------- saved games ------------------------------------------------------
+  function gameDoc() {
+    return { ...game, events: session.events, story: game.story.slice(-80), lines: game.lines.slice(-200) };
+  }
+  const save = () => { if (storage && game) storage.save(gameDoc()); };
+
+  async function renderSaved() {
+    const box = $("#saved"); box.textContent = "";
+    if (!storage) return;
+    const note = { account: "storage_account", browser: "storage_browser", memory: "storage_memory" }[storage.kind];
+    $("#storage-note").textContent = DATA.ui.he[note] + " · " + DATA.ui.ru[note];
+    let list = [];
+    try { list = await storage.list(); } catch { list = []; }
+    if (!list.length) return;
+    const h = document.createElement("h3");
+    h.textContent = DATA.ui.he.saved_games + " · " + DATA.ui.ru.saved_games; box.append(h);
+    list.slice(0, 6).forEach(g => {
+      const S = DATA.ui[g.language] || DATA.ui.he;
+      const names = g.events.filter(e => e.type === "player_added").map(e => e.payload.name).join(", ");
+      const row = document.createElement("div");
+      row.className = "saved-item"; row.lang = g.language; row.dir = g.language === "he" ? "rtl" : "ltr";
+      row.innerHTML = `<div style="min-width:0"><div class="names"></div><div class="when"></div></div>
+        <div class="row" style="flex:none"><button class="btn quiet go"></button><button class="btn del"></button></div>`;
+      $(".names", row).textContent = names || "—";
+      $(".when", row).textContent = new Date(g.updated || g.created).toLocaleString(g.language, { dateStyle: "medium", timeStyle: "short" });
+      $(".go", row).textContent = S.continue_game;
+      $(".go", row).onclick = () => openGame(g);
+      const del = $(".del", row); del.textContent = S.delete_game;
+      del.onclick = async () => {
+        if (!del.dataset.armed) { del.dataset.armed = "1"; del.textContent = S.confirm_delete; return; }
+        await storage.remove(g.id); renderSaved();
+      };
+      box.append(row);
+    });
+  }
+
+  // ---------- setup ------------------------------------------------------------
+  function renderSetupPlayers() {
+    const ul = $("#setup-players"); ul.textContent = "";
+    setupPlayers.forEach((p, i) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="who-name"></span><span class="stats"></span><button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;
+      $(".who-name", li).textContent = p.character ? `${p.name} · ${p.character}` : p.name;
+      $(".stats", li).textContent = `${t("strength")} ${p.strength} · ${t("craft")} ${p.craft} · ${t("lives")} ${p.lives} · ${t("fate")} ${p.fate} · ${t("gold")} ${p.gold}`;
+      const b = $("button", li); b.setAttribute("aria-label", t("remove"));
+      b.onclick = () => { setupPlayers.splice(i, 1); renderSetupPlayers(); };
+      ul.append(li);
+    });
+  }
+  $("#player-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const f = e.target, n = k => Math.max(0, Math.trunc(Number(f.elements[k].value)) || 0);
+    const name = f.elements.name.value.trim(), character = f.elements.character.value.trim();
+    if (!name) { f.elements.name.focus(); return; }
+    if (!character) { f.elements.character.focus(); return; }
+    setupPlayers.push({ id: "p" + uid(), name, character,
+      strength: n("strength"), craft: n("craft"), lives: Math.max(1, n("lives")), fate: n("fate"), gold: n("gold") });
+    f.elements.name.value = ""; f.elements.character.value = "";
+    renderSetupPlayers(); f.elements.name.focus();
+  });
+  $("#start-game").addEventListener("click", () => {
+    $("#setup-error").textContent = "";
+    if (!setupPlayers.length) { $("#setup-error").textContent = t("need_player"); return; }
+    session = Session.create($("#edition").value, lang);
+    game = { id: "g" + uid(), created: Date.now(), edition: $("#edition").value, language: lang,
+      intensity: $("#intensity").value, storyteller: prefs.get("storyteller", "fast"), scene: "road", story: [], lines: [], gear: {} };
+    narrator = new Narrator(DATA.narration, lang, game.intensity);
+    pendingFacts = [];
+    show("table");
+    for (const p of setupPlayers) dispatch("player_added", p, { quietStory: true });
+    setupPlayers = []; renderSetupPlayers();
+    maybeTell(true);
+  });
+
+  function openGame(g) {
+    try { session = new Session(g.events); }
+    catch (e) { toast(e.message); return; }
+    game = { id: g.id, created: g.created, edition: g.edition, language: g.language, intensity: g.intensity || "balanced",
+      storyteller: g.storyteller || "fast", scene: PLACES.includes(g.scene) ? g.scene : "road", story: g.story || [], lines: g.lines || [],
+      gear: g.gear || {} };
+    setLang(g.language);
+    narrator = new Narrator(DATA.narration, lang, game.intensity);
+    pendingFacts = [];
+    show("table");
+    const lastStory = game.story.at(-1), lastRule = game.lines.at(-1);
+    setStory(lastStory ? lastStory.text : (lastRule ? lastRule.text : t("story_empty")), false);
+    setRulesLine(lastStory && lastRule && lastRule.seq > lastStory.seq ? lastRule.text : "");
+    render(); updateMusic();
+  }
+
+  // ---------- the one way the game changes ------------------------------------
+  const STORY_TRIGGERS = new Set(["card_drawn", "combat_resolved", "player_recovered"]);
+  function dispatch(type, payload, { quietStory = false } = {}) {
+    showError("");
+    let cues;
+    try { cues = session.dispatch(type, payload); }
+    catch (e) { showError(e.message); return null; }
+    for (const cue of cues) {
+      const line = narrator.narrate(cue);
+      if (!line) continue;
+      lastLine = line;
+      game.lines.push({ seq: line.seq, text: line.text });
+      setRulesLine(""); setStory(line.text, true);
+      Speech.enqueue(line);
+      pendingFacts.push({ kind: cue.kind, facts: cue.facts, seq: cue.seq });
+    }
+    for (const cue of cues) {
+      if (cue.kind === "combat_resolved") {
+        if (cue.facts.outcome === "player_wins") music.sting("victory");
+        else if (cue.facts.outcome === "enemy_wins") music.sting("defeat");
+        if (cue.facts.respawn) game.scene = "village";
+      } else if (cue.kind === "card_drawn") music.sting("card");
+    }
+    save(); render(); updateMusic();
+    if (!quietStory && cues.some(c => STORY_TRIGGERS.has(c.kind))) maybeTell(false);
+    return cues;
+  }
+
+  // ---------- storyteller ------------------------------------------------------
+  function setStory(text, fresh) {
+    const el = $("#story"); el.textContent = text; el.classList.remove("writing");
+    if (fresh) { el.classList.remove("fresh"); void el.offsetWidth; el.classList.add("fresh"); }
+  }
+  function setRulesLine(text) { const el = $("#rules-line"); el.textContent = text; el.hidden = !text; }
+  const gmCopy = code => ({ not_granted: "gm_denied", rate_limited: "gm_limit", images_unavailable: "gm_no_images",
+    sampling_disabled: "gm_unavailable", capability_disabled: "gm_unavailable", capability_removed: "gm_unavailable",
+    not_declared: "gm_unavailable", session_expired: "gm_unavailable", bad_key: "gm_bad_key", network: "gm_network" })[code] || "gm_error";
+  function gmFailed(e) {
+    const key = gmCopy(e && e.code);
+    if (["gm_denied", "gm_unavailable", "gm_bad_key"].includes(key)) { gmBlocked = key; renderGmNote(); if (Live.eye) liveStop(); }
+    return key;
+  }
+
+  async function maybeTell(force) {
+    $("#btn-tell").hidden = true;
+    if (!gm || gmBlocked || game.storyteller === "off" || !pendingFacts.length) { renderGmNote(); return; }
+    const c = session.state.combat;
+    if (!force && c && c.phase !== "resolved") return;          // let the battle finish first
+    if (telling) return;                                          // the running call will pick these up next
+    const facts = pendingFacts.splice(0);
+    const ctl = new AbortController(); telling = ctl;
+    const rulesText = lastLine ? lastLine.text : "";
+    $("#story").classList.add("writing");
+    $("#story-status").textContent = t("gm_writing");
+    let shown = false;
+    try {
+      const res = await gm.tell({ lang, intensity: game.intensity, state: session.state,
+        storySoFar: game.story.map(s => s.text), facts },
+        { signal: ctl.signal, fast: game.storyteller !== "rich",
+          onText: ({ text }) => { if (!shown) { shown = true; setRulesLine(rulesText); } $("#story").textContent = text; } });
+      if (ctl.signal.aborted) return;
+      const lastSeq = facts.at(-1).seq;
+      if (!session.events.some(ev => ev.seq === lastSeq)) return;  // undone while Claude was writing
+      if (res.text) {
+        game.story.push({ seq: lastSeq, text: res.text });
+        setStory(res.text, true); setRulesLine(rulesText);
+        Speech.enqueue({ text: res.text, seq: lastSeq, interruptible: true, story: true });
+        save();
+      } else {
+        setStory(rulesText, false); setRulesLine("");
+        $("#story-status").textContent = t("story_rejected");
+        return;
+      }
+      $("#story-status").textContent = "";
+    } catch (e) {
+      if (e && e.code === "cancelled") return;
+      pendingFacts.unshift(...facts);                            // keep them for "Continue the story"
+      setStory(rulesText || t("story_empty"), false); setRulesLine("");
+      $("#story-status").textContent = t(gmFailed(e));
+      $("#btn-tell").hidden = !!gmBlocked;
+    } finally {
+      if (telling === ctl) telling = null;
+      $("#story").classList.remove("writing");
+      if (pendingFacts.length && !gmBlocked && $("#btn-tell").hidden && (!session.state.combat || session.state.combat.phase === "resolved")
+          && pendingFacts.some(f => STORY_TRIGGERS.has(f.kind))) maybeTell(false);
+    }
+  }
+  $("#btn-tell").onclick = () => maybeTell(true);
+  $("#btn-replay").onclick = () => {
+    const text = $("#story").textContent;
+    if (text) Speech.enqueue({ text, seq: Infinity, interruptible: true });
+  };
+  $("#btn-pause").onclick = () => {
+    const b = $("#btn-pause");
+    if (Speech.paused) { Speech.resume(); b.classList.remove("paused"); $("span", b).textContent = t("pause"); }
+    else { Speech.pause(); b.classList.add("paused"); $("span", b).textContent = t("resume_voice"); }
+  };
+
+  function renderGmNote() {
+    const note = $("#gm-note");
+    const key = gmBlocked || (!gm ? "gm_unavailable" : (!gm.imagesOk ? "gm_no_images" : null));
+    note.hidden = !key; if (key) note.textContent = t(key);
+    const canLook = !!(gm && gm.imagesOk && !gmBlocked);
+    $("#look-label").classList.toggle("primary", canLook);
+    $("#look-label").classList.toggle("quiet", !canLook);
+    $("#look-hint").hidden = !canLook;
+    $("#dice-photo-label").hidden = !canLook;
+    $("#usage-note").hidden = !(gm && !gmBlocked);
+    $("#btn-live").hidden = !LiveEye.supported() || !((gm && gm.auto && !gmBlocked) || (SITE && !gm)) || !!Live.eye;
+    if (SITE && !$("#btn-live").hidden) { $("#look-label").classList.remove("primary"); $("#look-label").classList.add("quiet"); $("#btn-live").classList.add("primary"); }
+  }
+
+  // ---------- render -------------------------------------------------------------
+  function render() {
+    if (!session) return;
+    renderPlayers(); renderCombat(); renderGmNote(); renderPlaces(); renderMusicButton();
+    if (Live.eye) renderLiveWho();
+    $("#set-intensity").value = game.intensity;
+    $("#set-storyteller").value = game.storyteller;
+  }
+
+  function renderPlaces() {
+    const box = $("#places");
+    if (!box.childElementCount) {
+      PLACES.forEach(p => {
+        const l = document.createElement("label");
+        l.innerHTML = `<input type="radio" name="place"><span></span>`;
+        const r = $("input", l); r.value = p; r.id = "place-" + p;
+        r.onchange = () => { game.scene = p; save(); updateMusic(); };
+        box.append(l);
+      });
+    }
+    $$("label", box).forEach(l => {
+      const r = $("input", l); $("span", l).textContent = t("scene_" + r.value); r.checked = r.value === game.scene;
+    });
+  }
+  $("#btn-music").onclick = () => { music.setEnabled(!music.enabled); renderMusicButton(); updateMusic(); };
+  $("#set-music-volume").value = music.volume;
+  $("#set-music-volume").oninput = e => music.setVolume(Number(e.target.value));
+
+  const heartText = n => (n <= 8 ? "♥".repeat(n) || "—" : `♥ × ${n}`);
+  function renderPlayers() {
+    const st = session.state, ul = $("#players"); ul.textContent = "";
+    const fighting = st.combat && st.combat.phase !== "resolved";
+    st.order.map(id => st.players[id]).forEach(p => {
+      const li = document.createElement("li");
+      li.className = "player" + (p.eliminated ? " out" : "") + (p.downed ? " downed" : "") +
+        (fighting && st.combatPlayer === p.id ? " active" : "");
+      li.innerHTML = `
+        <div class="p-head"><b class="p-name"></b><span class="p-char"></span></div>
+        <div class="p-stats"><span class="stat str"><i></i><b></b></span><span class="stat crf"><i></i><b></b></span><span class="stat fat"><i></i><b></b></span></div>
+        <div class="counters">
+          <span class="counter"><button class="mini" data-k="lives" data-d="-1">−</button><span class="val hearts"></span><button class="mini" data-k="lives" data-d="1">+</button></span>
+          <span class="counter"><button class="mini" data-k="gold" data-d="-1">−</button><span class="val coins"></span><button class="mini" data-k="gold" data-d="1">+</button></span>
+        </div>
+        <button class="btn btn-battle"></button>
+        <div class="village" hidden><span class="village-note"></span><input class="buy-n" type="number" min="1" inputmode="numeric"><button class="btn primary buy-btn"></button></div>`;
+      $(".p-name", li).textContent = p.name;
+      $(".p-char", li).textContent = p.eliminated ? t("eliminated") : p.downed ? t("at_village") : p.character;
+      [["str", "strength", p.strength], ["crf", "craft", p.craft], ["fat", "fate", p.fate]]
+        .forEach(([c, k, v]) => { $(`.${c} i`, li).textContent = t(k); $(`.${c} b`, li).textContent = v; });
+      const hearts = $(".hearts", li); hearts.textContent = heartText(p.lives); hearts.setAttribute("aria-label", `${t("lives")}: ${p.lives}`);
+      const coins = $(".coins", li); coins.textContent = `${t("gold")} ${p.gold}`;
+      $$(".mini", li).forEach(b => {
+        const minus = b.dataset.d === "-1";
+        b.setAttribute("aria-label", t(`${b.dataset.k}_${minus ? "minus" : "plus"}`));
+        b.onclick = () => dispatch(b.dataset.k === "lives" ? "lives_adjusted" : "gold_adjusted", { player_id: p.id, delta: Number(b.dataset.d) });
+      });
+      const battle = $(".btn-battle", li); battle.textContent = t("battle");
+      battle.disabled = p.eliminated || p.downed || fighting;
+      battle.onclick = () => openCombatForm(p);
+      if (p.downed) {
+        const v = $(".village", li), n = $(".buy-n", li), btn = $(".buy-btn", li); v.hidden = false;
+        const max = Math.min(p.startLives || 1, p.gold);
+        if (max >= 1) {
+          $(".village-note", li).textContent = t("buy_lives_note", { gold: p.gold });
+          n.max = max; n.value = max; n.setAttribute("aria-label", t("buy_lives")); btn.textContent = t("buy_lives");
+          btn.onclick = () => dispatch("player_recovered", { player_id: p.id, lives_bought: Number(n.value) });
+        } else {
+          $(".village-note", li).textContent = t("no_gold_note"); n.hidden = true; btn.textContent = t("free_life");
+          btn.onclick = () => dispatch("player_recovered", { player_id: p.id });
+        }
+      }
+      ul.append(li);
+    });
+  }
+
+  // ---------- battle -------------------------------------------------------------
+  function openCombatForm(p, prefill) {
+    pendingCombatPlayer = p; lastActor = p.id;
+    const f = $("#combat-form");
+    $("#combat").hidden = false; f.hidden = false; $("#combat-live").hidden = true;
+    f.reset();
+    const gear = (game.gear || {})[p.id];
+    if (gear) { f.elements.weapon.value = gear.weapon || 0; f.elements.other.value = gear.other || 0; f.elements.armour.checked = !!gear.armour; }
+    if (prefill) {
+      f.elements.enemy_name.value = prefill.name || "";
+      if (prefill.value != null) f.elements.enemy_value.value = prefill.value;
+      if (prefill.combat_type) $(`[name=ctype][value=${prefill.combat_type}]`, f).checked = true;
+    }
+    $("#combat").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  $("#combat-cancel").onclick = () => { $("#combat").hidden = true; };
+  $("#combat-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const f = e.target, mods = [];
+    const w = Math.trunc(Number(f.elements.weapon.value)) || 0, o = Math.trunc(Number(f.elements.other.value)) || 0;
+    if (w) mods.push({ source: t("weapon_bonus"), value: w, kind: "weapon" });
+    if (o) mods.push({ source: t("other_bonus"), value: o, kind: "other" });
+    combatArmour = f.elements.armour.checked; rerollMode = false;
+    game.gear = { ...(game.gear || {}), [pendingCombatPlayer.id]: { weapon: w, other: o, armour: combatArmour } };
+    dispatch("combat_started", { player_id: pendingCombatPlayer.id, combat_type: $("[name=ctype]:checked", f).value,
+      enemy_name: f.elements.enemy_name.value.trim(), enemy_value: Math.trunc(Number(f.elements.enemy_value.value)), modifiers: mods });
+  });
+
+  const PIPS = { 1: [5], 2: [3, 7], 3: [3, 5, 7], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
+  const dieFace = n => `<span class="face">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => `<i class="${PIPS[n].includes(i) ? "pip" : ""}"></i>`).join("")}</span>`;
+  $$(".die-pad").forEach(pad => {
+    for (let n = 1; n <= 6; n++) {
+      const b = document.createElement("button");
+      b.className = "die"; b.dataset.n = n; b.innerHTML = dieFace(n); b.setAttribute("aria-label", String(n));
+      b.onclick = () => onDie(pad.dataset.who, n);
+      pad.append(b);
+    }
+  });
+  function onDie(who, n) {
+    const c = session.state.combat;
+    if (!c || c.phase !== "awaiting_rolls") return;
+    if (who === "enemy") dispatch("enemy_rolled", { value: n });
+    else if (rerollMode) { rerollMode = false; dispatch("fate_reroll", { value: n }); }
+    else dispatch("player_rolled", { value: n });
+  }
+  $("#btn-reroll").onclick = () => { rerollMode = !rerollMode; renderCombat(); };
+  $("#btn-resolve").onclick = () => dispatch("combat_resolve", { player_has_protection: combatArmour });
+  $$("#protection button").forEach(b => {
+    b.onclick = () => dispatch("protection_result", { prevented: b.dataset.prevented === "true", source: t("has_armour") });
+  });
+  $("#result-close").onclick = () => { $("#combat").hidden = true; };
+
+  function renderCombat() {
+    const st = session.state, c = st.combat;
+    if (!c) { $("#combat").hidden = true; return; }
+    if (c.phase === "resolved" && $("#combat").hidden) return;
+    if (c.phase === "resolved" && !$("#combat-form").hidden) return;     // a new battle is being set up
+    $("#combat").hidden = false; $("#combat-form").hidden = true; $("#combat-live").hidden = false;
+    const base = c.player.attribute + c.player.modifiers.reduce((s, m) => s + m.value, 0);
+    $("#enemy-label").textContent = `${c.enemy.name} (${c.enemy.attribute})`;
+    $("#hero-label").textContent = `${c.player.name} (${base})`;
+    const hero = playerTotal(c), foe = enemyTotal(c);
+    $("#enemy-total").textContent = foe ?? "–"; $("#hero-total").textContent = hero ?? "–";
+    const tilt = hero != null && foe != null ? Math.max(-14, Math.min(14, (hero - foe) * 4)) : 0;
+    $("#beam-arm").style.setProperty("--tilt", tilt + "deg");
+    $$('.die-pad[data-who="enemy"] .die').forEach(b => b.classList.toggle("on", Number(b.dataset.n) === c.enemyRoll));
+    $$('.die-pad[data-who="player"] .die').forEach(b => b.classList.toggle("on", Number(b.dataset.n) === c.playerRoll));
+    const open = c.phase === "awaiting_rolls", rules = session.rules;
+    $$(".die").forEach(b => { b.disabled = !open; });
+    $('.die-pad[data-who="player"]').classList.toggle("rerolling", rerollMode);
+    const canReroll = open && c.playerRoll != null && c.fate >= rules.fateCostPerReroll && c.rerollsUsed < rules.maxRerollsPerRoll;
+    $("#btn-reroll").hidden = !canReroll; $("#btn-reroll").classList.toggle("armed", rerollMode);
+    $("#btn-resolve").hidden = !open; $("#btn-resolve").disabled = c.enemyRoll == null || c.playerRoll == null;
+    $("#dice-photo-label").hidden = !open || !(gm && gm.imagesOk && !gmBlocked);
+    $("#protection").hidden = c.phase !== "awaiting_protection";
+    $("#result").hidden = c.phase !== "resolved";
+    if (c.phase === "resolved") {
+      $("#result-text").textContent = `${t("outcome_" + c.result.outcome)} · ${c.result.playerTotal} : ${c.result.enemyTotal}`;
+      $("#result").dataset.outcome = c.result.outcome;
+    }
+  }
+
+  // ---------- undo -----------------------------------------------------------------
+  $("#btn-undo").onclick = () => {
+    let removed;
+    try { removed = session.undo(); } catch (e) { showError(e.message); return; }
+    if (telling) telling.abort();
+    Speech.dropSeq(removed.seq);
+    game.lines = game.lines.filter(l => l.seq < removed.seq);
+    game.story = game.story.filter(s => s.seq < removed.seq);
+    pendingFacts = pendingFacts.filter(f => f.seq < removed.seq);
+    const lastStory = game.story.at(-1), lastRule = game.lines.at(-1);
+    lastLine = lastRule ? { text: lastRule.text, seq: lastRule.seq } : null;
+    setStory(lastStory ? lastStory.text : (lastRule ? lastRule.text : t("story_empty")), false);
+    setRulesLine(lastStory && lastRule && lastRule.seq > lastStory.seq ? lastRule.text : "");
+    $("#story-status").textContent = "";
+    if (session.state.combat && session.state.combat.phase !== "resolved") $("#combat").hidden = false;
+    save(); render(); toast(t("undone"));
+  };
+
+  // ---------- the game master looks ---------------------------------------------
+  let lookFile = null, lookCtl = null, lookUrl = null;
+  async function startLook(file) {
+    if (!file) return;
+    lookFile = file;
+    const dlg = $("#look-dlg");
+    if (lookUrl) URL.revokeObjectURL(lookUrl);
+    lookUrl = URL.createObjectURL(file); $("#look-img").src = lookUrl;
+    $("#look-result").hidden = true; $("#look-result").textContent = ""; $("#look-error").textContent = "";
+    if (!dlg.open) dlg.showModal();
+    if (!gm || gmBlocked || !gm.imagesOk) { $("#look-busy").hidden = true; renderManualCard(); return; }
+    $("#look-busy").hidden = false;
+    if (lookCtl) lookCtl.abort();
+    const ctl = new AbortController(); lookCtl = ctl;
+    try {
+      const res = await gm.look(file, session.state, lang, ctl.signal);
+      if (ctl.signal.aborted) return;
+      renderLook(res);
+    } catch (e) {
+      if (e && e.code === "cancelled") return;
+      $("#look-error").textContent = t(gmFailed(e));
+      renderManualCard(true);
+    } finally { if (lookCtl === ctl) { lookCtl = null; $("#look-busy").hidden = true; } }
+  }
+  $("#look-photo").addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; startLook(f); });
+  $("#dice-photo").addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; startLook(f); });
+  $("#look-dlg").addEventListener("close", () => { if (lookCtl) lookCtl.abort(); });
+
+  function retakeButton() {
+    const b = document.createElement("label");
+    b.className = "btn"; b.style.cssText = "position:relative;overflow:hidden;text-align:center";
+    b.innerHTML = `<span></span><input type="file" accept="image/*" capture="environment" style="position:absolute;inset:0;opacity:0;font-size:0">`;
+    $("span", b).textContent = t("retake");
+    $("input", b).addEventListener("change", e => { const f = e.target.files[0]; e.target.value = ""; startLook(f); });
+    return b;
+  }
+  function el(tag, cls, text) { const x = document.createElement(tag); if (cls) x.className = cls; if (text != null) x.textContent = text; return x; }
+  function defaultActor() {
+    const st = session.state;
+    if (st.combat && st.combat.phase !== "resolved") return st.combatPlayer;
+    if (lastActor && st.players[lastActor]) return lastActor;
+    return st.order.find(id => !st.players[id].eliminated) || st.order[0];
+  }
+  function whoPicker() {
+    const st = session.state, box = el("div", "who"), def = defaultActor();
+    st.order.map(id => st.players[id]).filter(p => !p.eliminated).forEach(p => {
+      const l = document.createElement("label");
+      l.innerHTML = `<input type="radio" name="who"><span></span>`;
+      const r = $("input", l); r.value = p.id; r.id = "who-" + p.id; r.checked = p.id === def;
+      $("span", l).textContent = p.name; box.append(l);
+    });
+    return box;
+  }
+
+  function renderLook(res) {
+    const out = $("#look-result"); out.textContent = ""; out.hidden = false;
+    if (res.seen) out.append(el("p", "seen", res.seen));
+    if (res.confidence === "low" && res.kind !== "unclear") out.append(el("p", "warn", t("low_confidence")));
+    if (res.problem) out.append(el("p", "warn", `${t("problem")} ${res.problem}`));
+    const actions = el("div", "choices");
+
+    if (res.kind === "card" && res.card) {
+      const c = res.card, card = el("div", "card-view");
+      const other = lang === "he" ? "ru" : "he";
+      const name = el("div", "name", c["name_" + lang] || c.name_he || c.name_ru); name.lang = c["name_" + lang] ? lang : "he";
+      card.append(name);
+      if (c["name_" + other]) { const a = el("div", "alt", c["name_" + other]); a.lang = other; card.append(a); }
+      const text = c["text_" + lang] || c.text_he || "";
+      if (text) { const tx = el("div", "text", text); tx.lang = c["text_" + lang] ? lang : "he"; card.append(tx); }
+      let type = t("type_" + c.card_type);
+      if (c.card_type === "enemy" && c.enemy_value != null && c.combat_type) type += ` · ${t(c.combat_type)} ${c.enemy_value}`;
+      card.append(el("div", "type", type));
+      out.append(card, el("p", null, t("card_for")), whoPicker());
+      const ok = el("button", "btn primary", t("confirm_card"));
+      ok.onclick = () => {
+        const who = $("#look-result [name=who]:checked");
+        if (!who) return;
+        lastActor = who.value;
+        const cues = dispatch("card_drawn", { player_id: who.value, card: c });
+        if (!cues) return;
+        $("#look-dlg").close();
+        const p = session.state.players[who.value];
+        if (c.card_type === "enemy" && c.enemy_value != null && !p.downed && !p.eliminated &&
+            !(session.state.combat && session.state.combat.phase !== "resolved")) {
+          openCombatForm(p, { name: c["name_" + lang] || c.name_he || c.name_ru, value: c.enemy_value, combat_type: c.combat_type });
+        }
+      };
+      actions.append(ok, retakeButton());
+    } else if (res.kind === "dice") {
+      out.append(el("p", null, t("dice_seen")));
+      const faces = el("div", "dice-big");
+      res.dice.forEach(n => { const w = el("span", "face-wrap"); w.innerHTML = dieFace(n); w.setAttribute("aria-label", String(n)); faces.append(w); });
+      out.append(faces);
+      const c = session.state.combat;
+      if (c && c.phase === "awaiting_rolls") {
+        for (const n of [...new Set(res.dice)]) {
+          if (c.enemyRoll == null) {
+            const b = el("button", "btn", t("use_as_enemy", { enemy: c.enemy.name, n }));
+            b.onclick = () => { if (dispatch("enemy_rolled", { value: n })) $("#look-dlg").close(); };
+            actions.append(b);
+          }
+          if (c.playerRoll == null) {
+            const b = el("button", "btn", t("use_as_player", { player: c.player.name, n }));
+            b.onclick = () => { if (dispatch("player_rolled", { value: n })) $("#look-dlg").close(); };
+            actions.append(b);
+          }
+        }
+      } else out.append(el("p", "fine", t("dice_no_battle")));
+      actions.append(retakeButton());
+    } else {
+      actions.append(retakeButton());
+      const manual = el("button", "link", t("type_card_instead"));
+      manual.onclick = () => renderManualCard();
+      actions.append(manual);
+    }
+    out.append(actions);
+  }
+
+  function renderManualCard(keepError) {
+    const out = $("#look-result"); out.textContent = ""; out.hidden = false;
+    if (!keepError && (!gm || gmBlocked || !gm.imagesOk)) {
+      const key = gmBlocked || (!gm ? "gm_unavailable" : "gm_no_images");
+      out.append(el("p", "notice", t(key)));
+    }
+    const f = document.createElement("form"); f.className = "form"; f.autocomplete = "off";
+    f.innerHTML = `
+      <label class="wide"><span></span><input id="mc-name" name="name" required maxlength="60"></label>
+      <label class="wide"><span></span><textarea id="mc-text" name="text" rows="3"></textarea></label>
+      <label class="wide"><span></span><select id="mc-type" name="type"></select></label>
+      <fieldset class="seg mc-enemy"><legend></legend>
+        <label><input type="radio" name="ct" id="mc-str" value="strength" checked><span></span></label>
+        <label><input type="radio" name="ct" id="mc-crf" value="craft"><span></span></label></fieldset>
+      <label class="mc-enemy"><span></span><input id="mc-value" name="value" type="number" min="0" max="30" value="4" inputmode="numeric"></label>`;
+    const spans = $$("label > span:first-child", f);
+    [["card_name"], ["card_text"], ["card_type"]].forEach(([k], i) => { spans[i].textContent = t(k); });
+    $("legend", f).textContent = t("combat_type");
+    $("#mc-str + span", f).textContent = t("strength"); $("#mc-crf + span", f).textContent = t("craft");
+    $$(".mc-enemy", f)[1].querySelector("span").textContent = t("enemy_value");
+    ["enemy", "object", "magic_object", "follower", "place", "stranger", "event", "spell", "other"].forEach(v => {
+      const o = document.createElement("option"); o.value = v; o.textContent = t("type_" + v); $("#mc-type", f).append(o);
+    });
+    const sync = () => $$(".mc-enemy", f).forEach(x => { x.hidden = $("#mc-type", f).value !== "enemy"; });
+    $("#mc-type", f).onchange = sync; sync();
+    out.append(f, el("p", null, t("card_for")), whoPicker());
+    const ok = el("button", "btn primary", t("confirm_card"));
+    ok.onclick = () => {
+      const who = $("#look-result [name=who]:checked"), name = $("#mc-name", f).value.trim();
+      if (!who || !name) { $("#mc-name", f).focus(); return; }
+      const type = $("#mc-type", f).value;
+      const card = { card_type: type, ["name_" + lang]: name, ["text_" + lang]: $("#mc-text", f).value.trim() };
+      if (type === "enemy") { card.combat_type = $("[name=ct]:checked", f).value; card.enemy_value = Math.trunc(Number($("#mc-value", f).value)); }
+      lastActor = who.value;
+      if (!dispatch("card_drawn", { player_id: who.value, card })) return;
+      $("#look-dlg").close();
+      const p = session.state.players[who.value];
+      if (type === "enemy" && !p.downed && !p.eliminated) openCombatForm(p, { name, value: card.enemy_value, combat_type: card.combat_type });
+    };
+    out.append(el("div", "choices"));
+    $(".choices", out).append(ok);
+  }
+
+
+  // ---------- live camera: the game master watches and reacts by itself ----------
+  // Every suggestion still goes through dispatch() — the rules engine decides —
+  // and is shown with a short countdown so a wrong reading can be cancelled
+  // (and Undo works as always).
+  const LOOK_GAP = 5000, CARD_WAIT = 4500, DIE_WAIT = 3000, SAME_CARD_MS = 3 * 60 * 1000;
+
+  function liveStatus(key, vars) {
+    const text = key ? t(key, vars) : "";
+    $("#live-status").textContent = text;
+  }
+  function liveDot(state) { $("#live-dot").dataset.state = state; }
+  async function liveStart() {
+    if (!gm || !gm.auto) { toast(t("live_need_key")); return; }
+    if (Live.eye) return;
+    Live.eye = new LiveEye({
+      onLook: (blob, manual) => liveLook(blob, manual),
+      onStatus: st => { if (!Live.busy) { liveDot(st); liveStatus({ moving: "live_moving", settling: "live_settling", dark: "live_dark" }[st] || (Live.waitUntil > Date.now() ? null : "live_calm")); } },
+    });
+    $("#live").hidden = false; renderLiveWho(); renderGmNote();
+    try {
+      await Live.eye.start($("#live-video"));
+      const tr = Live.eye.stream.getVideoTracks()[0];
+      if (tr) tr.addEventListener("ended", () => { if (Live.eye) { liveStop(); toast(t("live_stopped")); } });
+      liveStatus("live_calm"); liveDot("calm");
+      $("#live").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (e) {
+      Live.eye = null; $("#live").hidden = true; renderGmNote();
+      toast(t(e && (e.name === "NotAllowedError" || e.name === "SecurityError") ? "live_denied" : "live_stopped"));
+    }
+  }
+  function liveStop() {
+    if (Live.eye) Live.eye.stop();
+    Live.eye = null; clearTimeout(Live.timer); Live.queued = null;
+    if (Live.ctl) Live.ctl.abort();
+    clearPending();
+    $("#live").hidden = true; renderGmNote();
+  }
+  $("#btn-live").onclick = liveStart;
+  $("#live-stop").onclick = liveStop;
+  $("#live-look").onclick = () => { if (Live.eye) Live.eye.lookNow(); };
+
+  function renderLiveWho() {
+    const box = $("#live-who"); box.textContent = "";
+    if (!session) return;
+    const st = session.state;
+    if (!Live.turn || !st.players[Live.turn] || st.players[Live.turn].eliminated) Live.turn = defaultActor();
+    st.order.map(id => st.players[id]).filter(p => !p.eliminated).forEach(p => {
+      const l = document.createElement("label");
+      l.innerHTML = `<input type="radio" name="live-who"><span></span>`;
+      const r = $("input", l); r.value = p.id; r.id = "live-who-" + p.id; r.checked = p.id === Live.turn;
+      r.onchange = () => { Live.turn = p.id; lastActor = p.id; };
+      $("span", l).textContent = p.name; box.append(l);
+    });
+  }
+
+  // Looks are spaced out (the free Google tier allows only a few a minute);
+  // a newer picture replaces one still waiting.
+  function liveLook(blob, manual) {
+    if (!Live.eye) return;
+    const now = Date.now();
+    const wait = Math.max(manual ? 0 : Live.lastLookAt + LOOK_GAP, Live.waitUntil) - now;
+    if (Live.busy || wait > 0) {
+      Live.queued = { blob, manual };
+      if (!Live.busy) { clearTimeout(Live.timer); Live.timer = setTimeout(drainLive, wait); }
+      return;
+    }
+    runLook(blob);
+  }
+  function drainLive() {
+    const q = Live.queued; Live.queued = null;
+    if (q && Live.eye) liveLook(q.blob, q.manual);
+  }
+  async function runLook(blob) {
+    Live.busy = true; Live.lastLookAt = Date.now();
+    liveDot("looking"); liveStatus("live_looking");
+    const ctl = new AbortController(); Live.ctl = ctl;
+    try {
+      const res = await gm.look(blob, session.state, lang, ctl.signal);
+      if (ctl.signal.aborted || !Live.eye) return;
+      autoReact(res);
+    } catch (e) {
+      if (e && e.code === "cancelled") return;
+      if (e && e.code === "rate_limited") {
+        const s = e.retryAfter || 30;
+        Live.waitUntil = Date.now() + s * 1000;
+        liveStatus("live_wait", { s });
+      } else liveStatus(gmFailed(e));
+    } finally {
+      if (Live.ctl === ctl) Live.ctl = null;
+      Live.busy = false; liveDot(Live.eye ? "calm" : "off");
+      if (Live.queued) { clearTimeout(Live.timer); Live.timer = setTimeout(drainLive, Math.max(0, Math.max(Live.lastLookAt + LOOK_GAP, Live.waitUntil) - Date.now())); }
+    }
+  }
+
+  // A suggestion with a countdown: it happens by itself unless cancelled.
+  function clearPending() {
+    if (Live.pending) clearTimeout(Live.pending.timer);
+    Live.pending = null;
+    $("#live-pending").hidden = true;
+  }
+  function propose(text, act, ms, extra = []) {
+    if (Live.pending) { const p = Live.pending; clearPending(); p.act(); }   // the table moved on: keep the earlier one
+    const box = $("#live-pending"), actions = $("#live-pending-actions"), bar = $("#live-countdown");
+    $("#live-pending-text").textContent = text; actions.textContent = "";
+    const pend = { act, timer: null };
+    const go = () => { if (Live.pending !== pend) return; clearPending(); act(); };
+    const cancel = el("button", "btn", t("cancel")); cancel.onclick = () => { clearPending(); liveStatus("live_calm"); };
+    const ok = el("button", "btn primary", t("live_ok")); ok.onclick = go;
+    actions.append(cancel, ...extra.map(([label, fn]) => { const b = el("button", "btn", label); b.onclick = () => { clearPending(); fn(); }; return b; }), ok);
+    box.hidden = false;
+    bar.classList.remove("run"); bar.style.setProperty("--dur", "0s"); void bar.offsetWidth;
+    if (ms) { bar.style.setProperty("--dur", ms + "ms"); bar.classList.add("run"); pend.timer = setTimeout(go, ms); }
+    Live.pending = pend;
+  }
+  function choose(text, options) {     // no countdown: the players pick
+    if (Live.pending) { const p = Live.pending; clearPending(); p.act(); }
+    const box = $("#live-pending"), actions = $("#live-pending-actions");
+    $("#live-pending-text").textContent = text; actions.textContent = "";
+    const pend = { act: () => {}, timer: null };
+    for (const [label, fn] of options) { const b = el("button", "btn", label); b.onclick = () => { clearPending(); fn(); }; actions.append(b); }
+    const cancel = el("button", "btn", t("cancel")); cancel.onclick = () => clearPending(); actions.append(cancel);
+    $("#live-countdown").classList.remove("run");
+    box.hidden = false; Live.pending = pend;
+  }
+
+  const cardKey = c => String(c.name_he || c.name_ru || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const cardName = c => c["name_" + lang] || c.name_he || c.name_ru;
+  function canFight(p) { const c = session.state.combat; return p && !p.downed && !p.eliminated && !(c && c.phase !== "resolved"); }
+
+  // Both dice in: settle the battle by itself, after a pause for a Fate re-roll if one is possible.
+  function afterDice() {
+    const c = session.state.combat, rules = session.rules;
+    if (!c || c.phase !== "awaiting_rolls" || c.enemyRoll == null || c.playerRoll == null) return;
+    const resolve = () => { const cc = session.state.combat; if (cc && cc.phase === "awaiting_rolls") dispatch("combat_resolve", { player_has_protection: combatArmour }); };
+    const canReroll = c.fate >= rules.fateCostPerReroll && c.rerollsUsed < rules.maxRerollsPerRoll;
+    if (!canReroll) { resolve(); return; }
+    propose(`${c.player.name} ${playerTotal(c)} : ${enemyTotal(c)} ${c.enemy.name}`, resolve, 6000,
+      [[t("reroll"), () => { rerollMode = true; renderCombat(); }]]);
+  }
+  function autoReact(res) {
+    const st = session.state;
+    if (res.kind === "card" && res.card) {
+      if (res.confidence === "low") { liveStatus("live_low"); return; }
+      const c = res.card, key = cardKey(c);
+      if (Live.lastCard && Live.lastCard.key === key && Date.now() - Live.lastCard.at < SAME_CARD_MS) { liveStatus("live_same_card"); return; }
+      const pid = Live.turn && st.players[Live.turn] ? Live.turn : defaultActor(), p = st.players[pid];
+      const battle = c.card_type === "enemy" && c.enemy_value != null && c.combat_type && canFight(p);
+      let text = t("live_card", { card: cardName(c), player: p.name });
+      if (battle) text += "\n" + t("live_battle", { player: p.name, enemy: cardName(c), type: t(c.combat_type), value: c.enemy_value });
+      const take = () => {
+        Live.lastCard = { key, at: Date.now() };
+        lastActor = pid;
+        if (!dispatch("card_drawn", { player_id: pid, card: c })) return false;
+        return true;
+      };
+      const extra = battle ? [[t("live_edit"), () => { if (take()) openCombatForm(session.state.players[pid], { name: cardName(c), value: c.enemy_value, combat_type: c.combat_type }); }]] : [];
+      propose(text, () => {
+        if (!take() || !battle) return;
+        const g = (game.gear || {})[pid] || {}, mods = [];
+        if (g.weapon) mods.push({ source: t("weapon_bonus"), value: g.weapon, kind: "weapon" });
+        if (g.other) mods.push({ source: t("other_bonus"), value: g.other, kind: "other" });
+        combatArmour = !!g.armour; rerollMode = false; Live.battleDice = [];
+        pendingCombatPlayer = session.state.players[pid];
+        dispatch("combat_started", { player_id: pid, combat_type: c.combat_type, enemy_name: cardName(c), enemy_value: c.enemy_value, modifiers: mods });
+      }, CARD_WAIT, extra);
+      liveStatus(null);
+      return;
+    }
+    if (res.kind === "dice" && res.dice.length) {
+      const c = st.combat;
+      if (!c || c.phase !== "awaiting_rolls") { liveStatus("live_dice_no_battle", { dice: res.dice.join(", ") }); return; }
+      // dice still lying there from earlier in this battle are not new
+      let fresh = res.dice.slice();
+      if (fresh.length > 1) for (const used of Live.battleDice) { const i = fresh.indexOf(used); if (i >= 0 && fresh.length > 1) fresh.splice(i, 1); }
+      const put = (who, n) => {
+        Live.battleDice.push(n);
+        if (who === "reroll") { rerollMode = false; dispatch("fate_reroll", { value: n }); }
+        else dispatch(who === "enemy" ? "enemy_rolled" : "player_rolled", { value: n });
+        afterDice();
+      };
+      if (rerollMode && c.playerRoll != null) {
+        const n = fresh.at(-1);
+        propose(t("live_die_reroll", { player: c.player.name, n }), () => put("reroll", n), DIE_WAIT);
+      } else if (c.enemyRoll == null && c.playerRoll == null && fresh.length >= 2) {
+        const [a, b] = fresh;
+        if (a === b) { propose(`${t("live_die_enemy", { enemy: c.enemy.name, n: a })}\n${t("live_die_player", { player: c.player.name, n: b })}`, () => { Live.battleDice.push(a); dispatch("enemy_rolled", { value: a }); put("player", b); }, DIE_WAIT); }
+        else choose(t("live_which"), [[`${c.enemy.name}: ${a} · ${c.player.name}: ${b}`, () => { Live.battleDice.push(a); dispatch("enemy_rolled", { value: a }); put("player", b); }],
+          [`${c.enemy.name}: ${b} · ${c.player.name}: ${a}`, () => { Live.battleDice.push(b); dispatch("enemy_rolled", { value: b }); put("player", a); }]]);
+      } else {
+        const n = fresh[0];
+        if (c.enemyRoll == null) propose(t("live_die_enemy", { enemy: c.enemy.name, n }), () => put("enemy", n), DIE_WAIT);
+        else if (c.playerRoll == null) propose(t("live_die_player", { player: c.player.name, n }), () => put("player", n), DIE_WAIT);
+        else liveStatus("live_dice_no_battle", { dice: res.dice.join(", ") });
+      }
+      liveStatus(null);
+      return;
+    }
+    liveStatus("live_nothing", { seen: res.seen || "" });
+  }
+
+  // ---------- log & settings -------------------------------------------------------
+  $("#btn-log").onclick = () => {
+    const ol = $("#story-log"); ol.textContent = "";
+    const items = [...game.lines.map(l => ({ ...l, rule: true })), ...game.story.map(s => ({ ...s, rule: false }))]
+      .sort((a, b) => b.seq - a.seq || (a.rule ? 1 : -1));
+    if (!items.length) ol.append(el("li", "fine", t("story_empty")));
+    items.forEach(i => { const li = document.createElement("li"); li.append(el("p", i.rule ? "rule" : null, i.text)); ol.append(li); });
+    $("#log-dlg").showModal();
+  };
+  $("#btn-settings").onclick = () => $("#settings-dlg").showModal();
+  $$("dialog [data-close]").forEach(b => { b.onclick = () => b.closest("dialog").close(); });
+  $("#set-intensity").onchange = e => { game.intensity = e.target.value; narrator = new Narrator(DATA.narration, lang, game.intensity); save(); };
+  $("#set-storyteller").onchange = e => { game.storyteller = e.target.value; prefs.set("storyteller", e.target.value); save(); };
+  $("#set-rate").value = Speech.rate;
+  $("#set-mute").checked = Speech.muted;
+  $("#set-rate").oninput = e => { Speech.rate = Number(e.target.value); prefs.set("rate", Speech.rate); };
+  $("#set-mute").onchange = e => { Speech.muted = e.target.checked; if (Speech.muted) Speech.stopAll(); prefs.set("muted", Speech.muted); };
+  $("#set-voice").onchange = e => { Speech.voiceURI = e.target.value; prefs.set("voice." + lang, e.target.value); };
+  $("#btn-test-voice").onclick = testVoice;
+  $("#btn-test-voice-2").onclick = testVoice;
+  $("#btn-settings").addEventListener("click", refreshVoices);
+  $("#btn-settings").addEventListener("click", renderOwnMusic);
+
+  // ---------- the owner's free Google key (stand-alone site only) ---------------------
+  const both = k => DATA.ui.he[k] + " · " + DATA.ui.ru[k];
+  function renderKeyBox() {
+    const box = $("#key-box");
+    box.hidden = !SITE;
+    if (!SITE) return;
+    $$("[data-k]", box).forEach(e => { e.textContent = DATA.ui[e.lang][e.dataset.k]; });
+    const has = !!prefs.get("gkey", "");
+    $("#key-form").hidden = has && !box.dataset.editing;
+    $("#key-change").hidden = !has || !!box.dataset.editing;
+  }
+  $("#key-change").onclick = () => { $("#key-box").dataset.editing = "1"; $("#key-input").value = ""; renderKeyBox(); $("#key-input").focus(); };
+  $("#key-save").onclick = async () => {
+    const key = $("#key-input").value.trim();
+    if (!key) { $("#key-input").focus(); return; }
+    const status = $("#key-status");
+    status.textContent = both("key_checking");
+    const g = new GeminiMaster(key);
+    let verdict = "key_ok";
+    try { await g.test(); } catch (e) { verdict = e.code === "bad_key" ? "key_bad" : e.code === "rate_limited" ? "key_limit" : "key_unchecked"; }
+    status.textContent = both(verdict);
+    if (verdict === "key_bad") return;
+    prefs.set("gkey", key);
+    gm = g; gmBlocked = null;
+    delete $("#key-box").dataset.editing; $("#key-input").value = "";
+    renderKeyBox();
+  };
+
+  // ---------- boot ------------------------------------------------------------------
+  $$("[data-go=home]").forEach(b => { b.onclick = () => show("home"); });
+  $$(".lang-pick .btn").forEach(b => {
+    b.onclick = () => { setLang(b.dataset.lang); setupPlayers = []; renderSetupPlayers(); show("setup"); };
+  });
+  setLang(prefs.get("lang", "he"));
+  show("home");
+  window.addEventListener("beforeunload", () => { if (lang) prefs.set("lang", lang); });
+  (async () => {
+    const [st, master] = await Promise.all([new window.TMStorage().init(), GameMaster.connect().catch(() => null)]);
+    storage = st; gm = master;
+    if (!gm && SITE && prefs.get("gkey", "")) gm = new GeminiMaster(prefs.get("gkey", ""));
+    renderKeyBox();
+    if (!$("#screen-home").hidden) renderSaved();
+    if (session) render();
+  })();
+  window.TMApp = { get session() { return session; }, get game() { return game; }, get gm() { return gm; }, set gm(v) { gm = v; }, music, currentScene, Live };  // for tests
+})();
+
+</script>
+
+</body>
+</html>
