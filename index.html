@@ -46,12 +46,14 @@
 
 * { box-sizing: border-box; }
 html, body { background: var(--night); color: var(--ink); margin: 0; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overflow-x: hidden; }
 [hidden] { display: none !important; }
 body {
   font: 400 17px/1.5 var(--ui);
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 0 24px;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
   background: radial-gradient(120% 50% at 50% -10%, #2a3458 0%, transparent 60%), var(--night);
   min-height: 100%;
 }
@@ -104,7 +106,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn-pause { min-height: 40px; border-radius: 20px; padding: 6px 16px; border: 1px solid var(--line); background: var(--night-3); font-weight: 500; }
 .btn-pause.paused { background: var(--gold); color: var(--gold-ink); }
 label { display: grid; gap: 4px; font-size: .88rem; color: var(--ink-dim); }
-input, select, textarea { font: inherit; color: var(--ink); background: var(--night-2); border: 1px solid var(--line); border-radius: 10px;
+/* 16px or more: iPhones zoom the whole page into any smaller text field and do not zoom back */
+input, select, textarea { font: inherit; font-size: max(16px, 1em); color: var(--ink); background: var(--night-2); border: 1px solid var(--line); border-radius: 10px;
   min-height: var(--tap); padding: 8px 12px; width: 100%; }
 textarea { resize: vertical; line-height: 1.5; }
 input[type="range"] { padding: 0; accent-color: var(--gold); }
@@ -141,8 +144,9 @@ label.check input { width: 22px; height: 22px; min-height: 0; accent-color: var(
 
 /* ---------- look (camera) ---------- */
 .look { display: grid; gap: 6px; margin-bottom: 16px; }
-.look .btn.primary { min-height: 64px; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; overflow: hidden; }
-.look .btn.primary svg { width: 26px; height: 26px; }
+.look #look-label { min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; overflow: hidden; }
+.look #look-label.primary { min-height: 64px; font-size: 1.15rem; }
+.look #look-label svg { width: 26px; height: 26px; flex: none; }
 .look input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
 .look .hint { color: var(--ink-dim); font-size: .85rem; text-align: center; }
 .sheet { width: min(640px, 100vw); max-height: 88dvh; margin: auto auto 0; border: 1px solid var(--line); border-bottom: 0;
@@ -296,6 +300,12 @@ label.check input { width: 22px; height: 22px; min-height: 0; accent-color: var(
 .music-pack { position: relative; overflow: hidden; text-align: center; display: block; margin-bottom: 8px; }
 .music-pack input { position: absolute; inset: 0; opacity: 0; font-size: 0; }
 @media (prefers-reduced-motion: reduce) { .live-dot { animation: none !important; } .countdown i.run { transition: none; } }
+/* small phones (iPhone SE / mini): keep the top bar on one line */
+@media (max-width: 380px) {
+  .bar { gap: 0; }
+  .bar .icon-btn { min-width: 40px; min-height: 40px; }
+  .btn-pause { padding: 6px 10px; font-size: .9rem; }
+}
 
 </style>
 </head>
