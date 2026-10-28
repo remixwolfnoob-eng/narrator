@@ -306,6 +306,8 @@ label.check input { width: 22px; height: 22px; min-height: 0; accent-color: var(
   .bar .icon-btn { min-width: 40px; min-height: 40px; }
   .btn-pause { padding: 6px 10px; font-size: .9rem; }
 }
+.live-shot { position: absolute; bottom: 8px; inset-inline-end: 8px; max-width: 34%; max-height: 45%; border: 2px solid var(--gold); border-radius: 6px; object-fit: contain; background: #000; }
+.card-view .text.pending { opacity: .6; font-style: italic; }
 
 </style>
 </head>
@@ -416,7 +418,7 @@ label.check input { width: 22px; height: 22px; min-height: 0; accent-color: var(
       <p class="hint" id="look-hint" data-t="look_hint"></p>
     </div>
     <section id="live" class="live" hidden>
-      <div class="live-view"><video id="live-video" playsinline muted autoplay></video><span id="live-dot" class="live-dot" data-state="calm"></span></div>
+      <div class="live-view"><video id="live-video" playsinline muted autoplay></video><span id="live-dot" class="live-dot" data-state="calm"></span><img id="live-shot" class="live-shot" alt="" hidden></div>
       <p id="live-status" class="live-status" aria-live="polite"></p>
       <div class="live-turn"><span data-t="live_turn"></span><div id="live-who" class="who"></div></div>
       <div id="live-pending" class="live-pending" hidden>
@@ -549,7 +551,7 @@ label.check input { width: 22px; height: 22px; min-height: 0; accent-color: var(
   <div id="toast" class="toast" role="status" hidden></div>
 </main>
 <script>
-window.TM_DATA = {"ui": {"he": {"app_name": "מספר הסיפורים", "tagline": "מנחה משחק לשולחן: רואה, סופר ומספר", "new_game": "משחק חדש", "saved_games": "משחקים שמורים", "no_saved": "אין משחקים שמורים עדיין.", "continue_game": "המשך", "storage_account": "המשחקים נשמרים בחשבון Claude שלך, רק אצלך.", "storage_browser": "המשחקים נשמרים בדפדפן הזה בלבד.", "storage_memory": "השמירה לא זמינה כאן: המשחק יימחק כשהדף ייסגר.", "edition": "מהדורה", "edition_fifth": "מהדורה חמישית", "edition_revised_4th": "מהדורה רביעית מתוקנת", "intensity": "סגנון הקריינות", "intensity_minimal": "תמציתית", "intensity_balanced": "מאוזנת", "intensity_cinematic": "קולנועית", "storyteller": "המנחה מספר", "story_fast": "מהיר", "story_rich": "עשיר (איטי יותר)", "story_off": "כבוי", "players": "שחקנים", "add_player": "הוספת שחקן", "player_name": "שם השחקן", "character": "דמות", "remove": "הסרה", "strength": "עוצמה", "craft": "מיומנות", "lives": "חיים", "fate": "גורל", "gold": "זהב", "start_game": "התחלת המשחק", "need_player": "הוסיפו לפחות שחקן אחד.", "look_btn": "להראות למנחה", "look_hint": "צלמו קלף שנשלף או קוביות שנעצרו.", "looking": "המנחה מסתכל…", "gm_unavailable": "המנחה (Claude) לא זמין בתצוגה הזו. הקרבות והקריינות עובדים כרגיל.", "gm_no_images": "התצוגה הזו לא יכולה לשלוח תמונות למנחה.", "gm_denied": "לא ניתן אישור להשתמש ב־Claude. אפשר לשנות זאת בהרשאות של הדף.", "gm_limit": "הגעתם למגבלת השימוש ב־Claude כרגע. נסו שוב מאוחר יותר.", "gm_error": "המנחה לא הצליח לענות. נסו שוב.", "seen": "המנחה רואה:", "card_for": "מי שלף את הקלף?", "confirm_card": "כן, זה הקלף", "retake": "צילום חוזר", "type_card_instead": "הקלדת הקלף ביד", "card_name": "שם הקלף", "card_text": "טקסט הקלף", "card_type": "סוג הקלף", "type_enemy": "יריב", "type_object": "חפץ", "type_magic_object": "חפץ קסום", "type_follower": "בן לוויה", "type_place": "מקום", "type_stranger": "זר", "type_event": "אירוע", "type_spell": "כישוף", "type_other": "אחר", "dice_seen": "על הקוביות:", "use_as_enemy": "קוביית {enemy}: {n}", "use_as_player": "הקובייה של {player}: {n}", "dice_no_battle": "אין קרב שמחכה לקוביות, ולכן התוצאה לא נרשמה.", "low_confidence": "המנחה לא בטוח. בדקו לפני שאתם מאשרים.", "problem": "מה לא נראה טוב:", "close": "סגירה", "cancel": "ביטול", "battle": "קרב", "combat_type": "סוג הקרב", "enemy_name": "שם היריב", "enemy_value": "ערך היריב", "weapon_bonus": "בונוס נשק", "other_bonus": "בונוסים אחרים", "has_armour": "יש שריון או חפץ מגן", "begin_battle": "התחלת הקרב", "total": "סך הכול", "reroll": "הטלה חוזרת בעזרת גורל", "resolve": "הכרעה", "armour_question": "האם השריון הגן?", "saved": "כן, הגן", "not_saved": "לא הגן", "photo_dice": "צילום הקוביות", "outcome_player_wins": "ניצחון", "outcome_enemy_wins": "תבוסה", "outcome_standoff": "תיקו", "at_village": "בכפר, לפני החזרה למסע", "buy_lives": "קניית חיים", "buy_lives_note": "נקודת חיים עולה מטבע זהב אחד. זהב: {gold}", "no_gold_note": "אין זהב: מגיעה נקודת חיים אחת בחינם.", "free_life": "קבלת נקודת חיים", "eliminated": "הודח", "undo": "ביטול הפעולה האחרונה", "undone": "הפעולה בוטלה", "pause": "השהיה", "resume_voice": "המשך", "replay": "השמעה חוזרת", "story_log": "ספר המסע", "settings": "הגדרות", "voice": "קול", "speed": "מהירות דיבור", "mute": "השתקה", "gm_writing": "המנחה כותב…", "tell_story": "המשך הסיפור", "story_rejected": "הקטע של המנחה הוזכר בו מספר, ולכן הוא לא נשמר. שורת החוקים נשארת.", "story_empty": "הסיפור יתחיל ברגע שיקרה משהו על הלוח.", "privacy_photo": "התמונה נשלחת ל־Claude רק כשמצלמים, ואינה נשמרת.", "usage_note": "המנחה משתמש בחשבון Claude שלך: בלי מפתח ובלי תשלום נוסף, לפי מגבלות התוכנית שלך.", "lives_minus": "פחות חיים", "lives_plus": "יותר חיים", "gold_minus": "פחות זהב", "gold_plus": "יותר זהב", "home": "מסך הבית", "delete_game": "מחיקה", "confirm_delete": "למחוק את המשחק? לחצו שוב לאישור.", "waiting_dice": "ממתין לקוביות", "example": "לדוגמה", "disclaimer": "כלי עזר לא רשמי לשולחן. אינו קשור ל־Games Workshop.", "test_voice": "בדיקת קול", "voice_sample": "בדיקת קול. אם שומעים אותי, המספר מוכן להרפתקה.", "voice_auto": "אוטומטי (לפי השפה)", "voice_status": "קולות בעברית במכשיר: {n} מתוך {all}. קול בשימוש: {voice}.", "no_speech": "התצוגה הזו לא מאפשרת הקראה. נסו לפתוח את הדף ב־Safari דרך claude.ai.", "no_voice_ios": "לא נמצא במכשיר קול בעברית. אפשר להתקין אחד בחינם: הגדרות ← נגישות ← תוכן מדובר ← קולות ← עברית.", "no_voice_android": "לא נמצא במכשיר קול בעברית. אפשר להתקין אחד בחינם: הגדרות ← נגישות ← המרת טקסט לדיבור ← מנוע Google ← התקנת נתוני קול ← עברית.", "no_voice_windows": "במחשב הזה אין קול בעברית. אפשר להתקין אחד בחינם: הגדרות Windows ← זמן ושפה ← דיבור ← ניהול קולות ← הוספת קולות ← עברית. אחר כך סגרו ופתחו מחדש את הדפדפן. אפשרות נוספת: לפתוח את הדף ב־Microsoft Edge, שבו יש קולות מוכנים.", "no_voice_mac": "במחשב הזה אין קול בעברית. אפשר להתקין אחד בחינם: הגדרות המערכת ← נגישות ← תוכן מדובר ← קול המערכת ← ניהול קולות ← עברית.", "no_voice_other": "לא נמצא במכשיר קול בעברית. התקינו קול עברי בהגדרות ההקראה של המכשיר.", "voice_tip_ios": "לקול טבעי יותר באייפון: הגדרות ← נגישות ← תוכן מדובר ← קולות, ובחרו קול ״משופר״ או ״פרימיום״ בעברית או ברוסית. ההורדה חינמית.", "voice_tip_android": "לקול טבעי יותר: הגדרות ← נגישות ← המרת טקסט לדיבור, והתקינו את נתוני הקול של Google לעברית ולרוסית.", "voice_tip_windows": "במחשב Windows הקולות הטבעיים ביותר נמצאים ב־Microsoft Edge (קולות ״Online (Natural)״), בחינם. אפשר גם להוסיף קולות: הגדרות ← זמן ושפה ← דיבור ← ניהול קולות.", "voice_tip_mac": "לקול טבעי יותר: הגדרות המערכת ← נגישות ← תוכן מדובר ← קול המערכת ← ניהול קולות, ובחרו קול ״משופר״ או ״פרימיום״.", "voice_tip_other": "הקולות מגיעים מהמכשיר עצמו. אפשר להתקין קולות נוספים בהגדרות ההקראה של המכשיר.", "voice_natural_hint": "הקול הנוכחי הוא קול בסיסי. לקול אנושי יותר בחינם: במחשב, פתחו את הדף ב־Microsoft Edge (קולות ״Natural״); באייפון, הורידו קול ״פרימיום״ בהגדרות ← נגישות ← תוכן מדובר ← קולות.", "place": "איפה אנחנו? (משנה את המוזיקה)", "scene_road": "דרך", "scene_village": "כפר", "scene_city": "עיר", "scene_tavern": "פונדק", "scene_forest": "יער", "scene_graveyard": "בית קברות", "scene_inner": "האזור הפנימי", "music_on": "הפעלת מוזיקה", "music_off": "השתקת מוזיקה", "music_volume": "עוצמת המוזיקה", "own_music": "המוזיקה שלכם", "own_music_hint": "אפשר לבחור קובץ מוזיקה לכל מקום. הקובץ נשמר רק במכשיר הזה ומתנגן בלולאה.", "builtin_music": "מוזיקה מובנית", "choose_file": "בחירת קובץ", "loading_file": "טוען…", "file_failed": "לא הצלחנו לנגן את הקובץ הזה. נסו MP3 או M4A.", "not_saved_device": "מתנגן, אבל לא נשמר במכשיר", "scene_battle": "קרב", "scene_mystic": "קרב מיומנות", "sources_hint": "מוזיקה ימי־ביניימית חינמית:", "live_btn": "מצלמה חיה", "live_hint": "העמידו את הטלפון על מעמד כך שהמצלמה תביט במקום ליד הלוח. הניחו שם את הקלף שנשלף והטילו שם את הקוביות — אחת בכל פעם. המנחה ישים לב בעצמו.", "live_turn": "התור של:", "live_calm": "צופה בשולחן…", "live_moving": "יש תנועה…", "live_settling": "מחכה שהכול ייעצר…", "live_dark": "חשוך מדי — המצלמה לא רואה.", "live_looking": "המנחה מסתכל…", "live_nothing": "שום דבר חדש. {seen}", "live_same_card": "הקלף הזה כבר נקרא.", "live_wait": "מגבלת החינם של Google: ממתין {s} שניות.", "live_dice_no_battle": "קוביות: {dice}. אין כרגע קרב.", "live_low": "לא בטוח שראיתי נכון. קרבו את הקלף למצלמה או לחצו „להסתכל עכשיו”.", "live_card": "קלף חדש: {card} — {player}", "live_battle": "קרב: {player} ⚔ {enemy} · {type} {value}", "live_die_enemy": "קוביית היריב ({enemy}): {n}", "live_die_player": "הקובייה של {player}: {n}", "live_die_reroll": "הטלה חוזרת — {player}: {n}", "live_which": "שתי קוביות — איזו של מי?", "live_ok": "כן, עכשיו", "live_edit": "לשנות", "live_look_now": "להסתכל עכשיו", "live_stop": "לכבות מצלמה", "live_stopped": "המצלמה נעצרה. לחצו „מצלמה חיה” כדי להמשיך.", "live_denied": "אין גישה למצלמה. אפשרו מצלמה לאתר: הגדרות ← Safari ← מצלמה.", "live_need_key": "למצלמה החיה צריך מפתח חינמי של Google (במסך הראשי).", "gm_bad_key": "מפתח Google לא התקבל. בדקו אותו במסך הראשי.", "gm_network": "אין חיבור לאינטרנט.", "gm_limit_site": "המכסה החינמית של Google נגמרה לעכשיו. חכו דקה.", "gm_unavailable_site": "המנחה כבוי: הוסיפו מפתח חינמי של Google במסך הראשי. קרבות וסיפור עובדים גם בלעדיו.", "privacy_photo_site": "התמונות נשלחות ל‑Google Gemini עם המפתח שלכם ולא נשמרות כאן. בתוכנית החינמית Google עשויה להשתמש בהן לשיפור השירותים שלה.", "usage_note_site": "המנחה פועל עם המפתח החינמי שלכם של Google Gemini.", "music_pack": "לטעון את כל המוזיקה בבת אחת", "music_pack_done": "נטענו מקומות: {n}", "key_title": "מפתח למנחה · Google AI (בחינם)", "key_get": "לקבל מפתח חינמי", "key_privacy": "המפתח נשמר רק בטלפון הזה. בתוכנית החינמית Google עשויה להשתמש בתמונות לשיפור השירותים שלה.", "key_checking": "בודק…", "key_ok": "המפתח עובד", "key_bad": "המפתח לא התקבל", "key_limit": "המפתח תקין, אבל המכסה נגמרה לעכשיו", "key_unchecked": "נשמר, אבל לא הצלחתי לבדוק (אין אינטרנט?)", "key_change": "להחליף מפתח"}, "ru": {"app_name": "Рассказчик", "tagline": "Ведущий за игровым столом: видит, считает и рассказывает", "new_game": "Новая игра", "saved_games": "Сохранённые игры", "no_saved": "Сохранённых игр пока нет.", "continue_game": "Продолжить", "storage_account": "Игры сохраняются в вашем аккаунте Claude, только для вас.", "storage_browser": "Игры сохраняются только в этом браузере.", "storage_memory": "Сохранение здесь недоступно: игра пропадёт, когда страница закроется.", "edition": "Издание", "edition_fifth": "5-е издание", "edition_revised_4th": "4-е исправленное издание", "intensity": "Стиль рассказа", "intensity_minimal": "Кратко", "intensity_balanced": "Сбалансированно", "intensity_cinematic": "Кинематографично", "storyteller": "Ведущий рассказывает", "story_fast": "Быстро", "story_rich": "Подробно (медленнее)", "story_off": "Выключено", "players": "Игроки", "add_player": "Добавить игрока", "player_name": "Имя игрока", "character": "Персонаж", "remove": "Убрать", "strength": "Сила", "craft": "Мастерство", "lives": "Жизни", "fate": "Судьба", "gold": "Золото", "start_game": "Начать игру", "need_player": "Добавьте хотя бы одного игрока.", "look_btn": "Показать ведущему", "look_hint": "Сфотографируйте вытянутую карту или остановившиеся кубики.", "looking": "Ведущий смотрит…", "gm_unavailable": "Ведущий (Claude) здесь недоступен. Бои и рассказ работают как обычно.", "gm_no_images": "Отсюда нельзя отправлять фотографии ведущему.", "gm_denied": "Использование Claude не разрешено. Это можно изменить в разрешениях страницы.", "gm_limit": "Сейчас достигнут лимит использования Claude. Попробуйте позже.", "gm_error": "Ведущий не смог ответить. Попробуйте ещё раз.", "seen": "Ведущий видит:", "card_for": "Кто вытянул карту?", "confirm_card": "Да, это карта", "retake": "Переснять", "type_card_instead": "Ввести карту вручную", "card_name": "Название карты", "card_text": "Текст карты", "card_type": "Тип карты", "type_enemy": "Враг", "type_object": "Предмет", "type_magic_object": "Магический предмет", "type_follower": "Спутник", "type_place": "Место", "type_stranger": "Незнакомец", "type_event": "Событие", "type_spell": "Заклинание", "type_other": "Другое", "dice_seen": "На кубиках:", "use_as_enemy": "Кубик врага ({enemy}): {n}", "use_as_player": "Кубик игрока {player}: {n}", "dice_no_battle": "Сейчас нет боя, который ждёт кубиков, поэтому результат не записан.", "low_confidence": "Ведущий не уверен. Проверьте, прежде чем подтверждать.", "problem": "Что видно плохо:", "close": "Закрыть", "cancel": "Отмена", "battle": "Бой", "combat_type": "Тип боя", "enemy_name": "Противник", "enemy_value": "Значение противника", "weapon_bonus": "Бонус оружия", "other_bonus": "Другие бонусы", "has_armour": "Есть доспех или защитный предмет", "begin_battle": "Начать бой", "total": "Итог", "reroll": "Перебросить за Судьбу", "resolve": "Подвести итог", "armour_question": "Доспех защитил?", "saved": "Да, защитил", "not_saved": "Не защитил", "photo_dice": "Сфотографировать кубики", "outcome_player_wins": "Победа", "outcome_enemy_wins": "Поражение", "outcome_standoff": "Ничья", "at_village": "В Деревне, перед возвращением в путь", "buy_lives": "Купить жизни", "buy_lives_note": "Одна жизнь стоит одну монету. Золото: {gold}", "no_gold_note": "Золота нет: одна жизнь бесплатно.", "free_life": "Получить жизнь", "eliminated": "Выбыл", "undo": "Отменить последнее", "undone": "Действие отменено", "pause": "Пауза", "resume_voice": "Продолжить", "replay": "Повторить", "story_log": "Летопись", "settings": "Настройки", "voice": "Голос", "speed": "Скорость речи", "mute": "Без звука", "gm_writing": "Ведущий пишет…", "tell_story": "Продолжить историю", "story_rejected": "В тексте ведущего оказались числа, поэтому он не сохранён. Остаётся строка правил.", "story_empty": "История начнётся, как только на поле что-то произойдёт.", "privacy_photo": "Фото отправляется Claude только когда вы снимаете, и не сохраняется.", "usage_note": "Ведущий использует ваш аккаунт Claude: без ключа и без доплаты, в пределах вашего тарифа.", "lives_minus": "Меньше жизней", "lives_plus": "Больше жизней", "gold_minus": "Меньше золота", "gold_plus": "Больше золота", "home": "На главную", "delete_game": "Удалить", "confirm_delete": "Удалить игру? Нажмите ещё раз для подтверждения.", "waiting_dice": "Ждём кубики", "example": "пример", "disclaimer": "Неофициальный помощник для игрового стола. Не связан с Games Workshop.", "test_voice": "Проверить голос", "voice_sample": "Проверка голоса. Если вы меня слышите, рассказчик готов к приключению.", "voice_auto": "Автоматически (по языку)", "voice_status": "Русских голосов на устройстве: {n} из {all}. Используется: {voice}.", "no_speech": "Здесь озвучка недоступна. Попробуйте открыть страницу в Safari через claude.ai.", "no_voice_ios": "На устройстве не найден русский голос. Его можно установить бесплатно: Настройки → Универсальный доступ → Устный контент → Голоса → Русский.", "no_voice_android": "На устройстве не найден русский голос. Его можно установить бесплатно: Настройки → Специальные возможности → Синтез речи → Google → Установить голосовые данные → Русский.", "no_voice_windows": "На этом компьютере нет русского голоса. Его можно установить бесплатно: Параметры Windows → Время и язык → Речь → Управление голосами → Добавить голоса → Русский. Потом закройте и снова откройте браузер. Или откройте страницу в Microsoft Edge: там русские голоса уже есть.", "no_voice_mac": "На этом компьютере нет русского голоса. Его можно установить бесплатно: Системные настройки → Универсальный доступ → Устный контент → Системный голос → Управление голосами → Русский.", "no_voice_other": "На устройстве не найден русский голос. Установите русский голос в настройках синтеза речи.", "voice_tip_ios": "Для более живого голоса на iPhone: Настройки → Универсальный доступ → Устный контент → Голоса, выберите «улучшенный» или «премиум» голос. Загрузка бесплатна.", "voice_tip_android": "Для более живого голоса: Настройки → Специальные возможности → Синтез речи, установите голосовые данные Google для русского и иврита.", "voice_tip_windows": "На компьютере с Windows самые естественные голоса есть в Microsoft Edge (голоса «Online (Natural)»), бесплатно. Голоса можно и добавить: Параметры → Время и язык → Речь → Управление голосами.", "voice_tip_mac": "Для более живого голоса: Системные настройки → Универсальный доступ → Устный контент → Системный голос → Управление голосами, выберите «улучшенный» или «премиум» голос.", "voice_tip_other": "Голоса берутся из самого устройства. Дополнительные голоса устанавливаются в настройках синтеза речи.", "voice_natural_hint": "Сейчас используется простой голос. Для более живого голоса бесплатно: на компьютере откройте страницу в Microsoft Edge (голоса «Natural»); на iPhone скачайте «премиум» голос в Настройки → Универсальный доступ → Устный контент → Голоса.", "place": "Где мы? (меняет музыку)", "scene_road": "Дорога", "scene_village": "Деревня", "scene_city": "Город", "scene_tavern": "Таверна", "scene_forest": "Лес", "scene_graveyard": "Кладбище", "scene_inner": "Внутренний круг", "music_on": "Включить музыку", "music_off": "Выключить музыку", "music_volume": "Громкость музыки", "own_music": "Своя музыка", "own_music_hint": "Для каждого места можно выбрать свой музыкальный файл. Он хранится только на этом устройстве и играет по кругу.", "builtin_music": "Встроенная музыка", "choose_file": "Выбрать файл", "loading_file": "Загрузка…", "file_failed": "Не удалось воспроизвести этот файл. Попробуйте MP3 или M4A.", "not_saved_device": "играет, но не сохранён на устройстве", "scene_battle": "Бой", "scene_mystic": "Бой Мастерства", "sources_hint": "Бесплатная средневековая музыка:", "live_btn": "Живая камера", "live_hint": "Поставьте телефон на подставку так, чтобы камера смотрела на место рядом с полем. Кладите туда вытянутую карту и бросайте там кубики — по одному. Ведущий заметит сам.", "live_turn": "Чей ход:", "live_calm": "Смотрю на стол…", "live_moving": "Вижу движение…", "live_settling": "Жду, пока всё остановится…", "live_dark": "Слишком темно — камере ничего не видно.", "live_looking": "Ведущий смотрит…", "live_nothing": "Ничего нового. {seen}", "live_same_card": "Эта карта уже прочитана.", "live_wait": "Бесплатный лимит Google: жду {s} с.", "live_dice_no_battle": "Кубики: {dice}. Боя сейчас нет.", "live_low": "Не уверен, что вижу правильно. Положите карту ближе к камере или нажмите «Посмотреть сейчас».", "live_card": "Новая карта: {card} — {player}", "live_battle": "Бой: {player} ⚔ {enemy} · {type} {value}", "live_die_enemy": "Кубик врага ({enemy}): {n}", "live_die_player": "Кубик — {player}: {n}", "live_die_reroll": "Переброс — {player}: {n}", "live_which": "Два кубика — какой чей?", "live_ok": "Да, сейчас", "live_edit": "Изменить", "live_look_now": "Посмотреть сейчас", "live_stop": "Выключить камеру", "live_stopped": "Камера остановилась. Нажмите «Живая камера», чтобы продолжить.", "live_denied": "Нет доступа к камере. Разрешите камеру для этого сайта: Настройки → Safari → Камера.", "live_need_key": "Для живой камеры нужен бесплатный ключ Google (на главном экране).", "gm_bad_key": "Ключ Google не подошёл. Проверьте его на главном экране.", "gm_network": "Нет связи с интернетом.", "gm_limit_site": "Бесплатный лимит Google на сейчас исчерпан. Подождите минуту.", "gm_unavailable_site": "Ведущий выключен: добавьте бесплатный ключ Google на главном экране. Бои и рассказ работают и без него.", "privacy_photo_site": "Снимки отправляются в Google Gemini по вашему ключу и не сохраняются здесь. На бесплатном тарифе Google может использовать их для улучшения своих сервисов.", "usage_note_site": "Ведущий работает на вашем бесплатном ключе Google Gemini.", "music_pack": "Загрузить всю музыку сразу", "music_pack_done": "Загружено мест: {n}", "key_title": "Ключ ведущего · Google AI (бесплатно)", "key_get": "Получить бесплатный ключ", "key_privacy": "Ключ хранится только на этом телефоне. На бесплатном тарифе Google может использовать снимки для улучшения своих сервисов.", "key_checking": "Проверяю…", "key_ok": "Ключ работает", "key_bad": "Ключ не подошёл", "key_limit": "Ключ верный, но лимит сейчас исчерпан", "key_unchecked": "Сохранён, но проверить не удалось (нет интернета?)", "key_change": "Изменить ключ"}}, "narration": {"he": {"_meta": {"language": "he", "direction": "rtl", "status": "draft — needs native-speaker review; phrasing avoids gendered verbs because player gender is not yet modelled; enemy names assumed grammatically masculine — needs a gender field in the card glossary", "terms_source": "Hebrew 5th edition box (confirmed by owner)"}, "terms": {"strength": "עוצמה", "craft": "מיומנות", "life": "נקודת חיים", "fate": "גורל"}, "player_joined": {"balanced": ["ברוכים הבאים למסע, {player}! הדמות: {character}.", "דמות חדשה על הלוח: {character}, בהנהגת {player}."]}, "combat_started": {"minimal": ["קרב {combat_type_term}: {player} מול {enemy} ({enemy_value})."], "balanced": ["{enemy} חוסם את הדרך. קרב {combat_type_term} מתחיל — {combat_type_term_def} של היריב: {enemy_value_word}.", "מן הצללים מגיח {enemy}; {combat_type_term_def} שלו: {enemy_value_word}. זהו קרב {combat_type_term}."], "cinematic": ["האוויר מצטנן. {enemy} מגיח מן הצללים, וטפריו שורטים את האבן. {combat_type_term_def} שלו: {enemy_value_word} — קרב {combat_type_term} מתחיל!", "אדמה רועדת תחת רגלי {enemy}. {combat_type_term_def} שלו, {enemy_value_word}, עומדת מול {player}. הגיע הזמן לקרב {combat_type_term}."]}, "enemy_rolled": {"minimal": ["{enemy}: קובייה {roll}, סך הכול {total}."], "balanced": ["{enemy} מטיל את הקובייה... {roll_word}! סך התקיפה: {total_word}. {player_prompt}", "הקובייה של {enemy} נעצרת על {roll_word}. סך הכול {total_word}. {player_prompt}"]}, "player_prompt": "{player}, תורך להטיל את הקובייה.", "player_rolled": {"minimal": ["{player}: קובייה {roll}."], "balanced": ["הקובייה של {player} נעצרת על {roll_word}.", "{roll_word}! זו התוצאה של {player}."]}, "fate_reroll": {"balanced": ["הגורל מתערב! הטלה חוזרת: {roll_word}. נקודות גורל שנותרו: {fate_left}."]}, "protection_check": {"balanced": ["{enemy} גובר — {enemy_total} מול {player_total}. {player}, בדקו אם השריון מגן, ודווחו על התוצאה."]}, "combat_resolved": {"player_wins": {"minimal": ["ניצחון ל־{player}: {player_total} מול {enemy_total}."], "balanced": ["{player_total_word} מול {enemy_total_word} — הניצחון של {player}! {enemy} נופל.", "{player} מכריע את {enemy}: {player_total_word} מול {enemy_total_word}."], "cinematic": ["פלדה פוגשת עצם, ו־{enemy} קורס ארצה. {player_total_word} מול {enemy_total_word} — הניצחון של {player}! היער נושם לרווחה."]}, "enemy_wins": {"minimal": ["{enemy} גובר: {enemy_total} מול {player_total}. המחיר: {lives_lost_words}. נותרו: {lives_left}."], "balanced": ["{enemy} גובר — {enemy_total_word} מול {player_total_word}. המחיר: {lives_lost_words}. נקודות חיים שנותרו ל־{player}: {lives_left}.", "{player_total_word} מול {enemy_total_word} — היתרון ל־{enemy}. המחיר: {lives_lost_words}. נקודות חיים שנותרו ל־{player}: {lives_left}."], "cinematic": ["{enemy_total_word} מול {player_total_word}. טפרים פוגעים, והמחיר כבד: {lives_lost_words}. היצור נסוג אל החשכה. נקודות חיים שנותרו ל־{player}: {lives_left}."]}, "enemy_wins_protected": {"balanced": ["{enemy} גובר, אבל {protection} עומד במכה! אף נקודת חיים לא אבדה."]}, "standoff": {"minimal": ["תיקו: {player_total} מול {enemy_total}."], "balanced": ["{player_total_word} מול {enemy_total_word} — תיקו. איש אינו נסוג, ואיש אינו נפגע."]}, "eliminated": "המסע של {player} הגיע לסופו.", "respawn": "זה לא הסוף: {player} — חזרה לכפר. בתור הבא אפשר לקנות נקודות חיים בזהב."}, "player_recovered": {"paid": {"balanced": ["חזרה למסע! {player} — נקודות חיים: {lives_bought}. זהב שנותר: {gold_left}."]}, "free": {"balanced": ["אין זהב, אבל הכפר רחום: נקודת חיים אחת בחינם ל־{player}. בחזרה למסע!"]}}, "card_drawn": {"enemy": {"minimal": ["{player}: יריב — {card_name}. {card_text}"], "balanced": ["קלף חדש עבור {player} — ויריב בדרך: {card_name}! {card_text}", "הקלף נחשף, ומול {player} עומד יריב: {card_name}. {card_text}"], "cinematic": ["הקלף מתהפך... ומן החשכה מגיח {card_name}! {card_text}"]}, "other": {"minimal": ["{player}: קלף «{card_name}». {card_text}"], "balanced": ["קלף חדש עבור {player}: «{card_name}». {card_text}"], "cinematic": ["הגורל פותח דף חדש: «{card_name}». {card_text}"]}}}, "ru": {"_meta": {"language": "ru", "direction": "ltr", "status": "draft — needs native-speaker review; present tense used to avoid gendered past-tense verbs", "terms_source": "No Russian 5th edition exists; Мастерство chosen to match Hebrew מיומנות (skill)"}, "terms": {"strength": "Сила", "craft": "Мастерство", "life": "жизнь", "fate": "Судьба"}, "player_joined": {"balanced": ["{player} вступает в путь в образе героя: {character}.", "Новый герой на поле — {character}. Ведёт его {player}."]}, "combat_started": {"minimal": ["Бой ({combat_type_term}): {player} против {enemy} ({enemy_value})."], "balanced": ["{enemy} преграждает путь. Начинается бой — {combat_type_term}. Мощь врага: {enemy_value_word}.", "Из тени выходит {enemy}, его мощь — {enemy_value_word}. Бой начинается: {combat_type_term}!"], "cinematic": ["Воздух стынет. Из тени выползает {enemy}, когти скребут по камню. Его мощь — {enemy_value_word}. Бой начинается!", "Земля дрожит под шагами врага: {enemy}. Мощь {enemy_value_word} против отваги героя по имени {player}."]}, "enemy_rolled": {"minimal": ["{enemy}: кубик {roll}, итог {total}."], "balanced": ["{enemy} бросает кубик... {roll_word}! Сила удара — {total_word}. {player_prompt}", "Кубик врага замирает на числе {roll_word}. Итог — {total_word}. {player_prompt}"]}, "player_prompt": "{player}, ваш бросок!", "player_rolled": {"minimal": ["{player}: кубик {roll}."], "balanced": ["Кубик замирает: {roll_word}.", "{roll_word}! Таков бросок героя по имени {player}."]}, "fate_reroll": {"balanced": ["Судьба вмешивается! Новый бросок: {roll_word}. Очков Судьбы осталось: {fate_left}."]}, "protection_check": {"balanced": ["{enemy} сильнее — {enemy_total} против {player_total}. {player}, проверьте защиту доспеха и сообщите результат."]}, "combat_resolved": {"player_wins": {"minimal": ["Победа: {player}, {player_total} против {enemy_total}."], "balanced": ["{player_total_word} против {enemy_total_gen} — {player} побеждает! Враг повержен.", "{player} одолевает врага по имени {enemy}: {player_total_word} против {enemy_total_gen}."], "cinematic": ["Сталь встречает кость, и {enemy} рушится наземь. {player_total_word} против {enemy_total_gen} — победа за героем по имени {player}! Лес облегчённо вздыхает."]}, "enemy_wins": {"minimal": ["{enemy} побеждает: {enemy_total} против {player_total}. −{lives_lost}, осталось {lives_left}."], "balanced": ["{enemy} берёт верх — {enemy_total_word} против {player_total_gen}. {player} теряет {lives_lost_words}. Осталось: {lives_left_words}.", "{enemy_total_word} против {player_total_gen} — перевес на стороне врага. {player} теряет {lives_lost_words}. Осталось: {lives_left_words}."], "cinematic": ["{enemy_total_word} против {player_total_gen}. Когти находят цель, и {player} теряет {lives_lost_words}. Тварь отступает во тьму. Осталось: {lives_left_words}."]}, "enemy_wins_protected": {"balanced": ["{enemy} берёт верх, но {protection} выдерживает удар! Ни одна жизнь не потеряна."]}, "standoff": {"minimal": ["Ничья: {player_total} против {enemy_total}."], "balanced": ["{player_total_word} против {enemy_total_gen} — ничья. Никто не отступает, никто не ранен."]}, "eliminated": "Путь героя по имени {player} окончен.", "respawn": "Но это не конец: {player} возвращается в Деревню. В следующий ход можно купить жизни за золото."}, "player_recovered": {"paid": {"balanced": ["{player} снова в пути! Куплено в Деревне: {lives_bought_words}. Золота осталось: {gold_left}."]}, "free": {"balanced": ["Золота нет, но Деревня милосердна: {player} получает одну жизнь даром. Снова в путь!"]}}, "card_drawn": {"enemy": {"minimal": ["{player}: враг — {card_name}. {card_text}"], "balanced": ["{player} тянет карту — и это враг: {card_name}! {card_text}", "Карта открыта, и перед героем по имени {player} встаёт враг: {card_name}. {card_text}"], "cinematic": ["Карта переворачивается... Из тьмы выходит {card_name}! {card_text}", "Тишину разрывает рёв: {card_name} преграждает путь. {card_text}"]}, "other": {"minimal": ["{player}: карта «{card_name}». {card_text}"], "balanced": ["{player} тянет карту: «{card_name}». {card_text}", "Новая карта для героя по имени {player}: «{card_name}». {card_text}"], "cinematic": ["Судьба открывает новую страницу: «{card_name}». {card_text}"]}}}}, "tracks": {}, "site": true, "loops": {"road": 117.95, "village": 38.94, "city": 43.4375, "tavern": 36.0361, "forest": 91.45, "graveyard": 56.6193, "inner": 137.95, "battle": 14.0115}};
+window.TM_DATA = {"ui": {"he": {"app_name": "מספר הסיפורים", "tagline": "מנחה משחק לשולחן: רואה, סופר ומספר", "new_game": "משחק חדש", "saved_games": "משחקים שמורים", "no_saved": "אין משחקים שמורים עדיין.", "continue_game": "המשך", "storage_account": "המשחקים נשמרים בחשבון Claude שלך, רק אצלך.", "storage_browser": "המשחקים נשמרים בדפדפן הזה בלבד.", "storage_memory": "השמירה לא זמינה כאן: המשחק יימחק כשהדף ייסגר.", "edition": "מהדורה", "edition_fifth": "מהדורה חמישית", "edition_revised_4th": "מהדורה רביעית מתוקנת", "intensity": "סגנון הקריינות", "intensity_minimal": "תמציתית", "intensity_balanced": "מאוזנת", "intensity_cinematic": "קולנועית", "storyteller": "המנחה מספר", "story_fast": "מהיר", "story_rich": "עשיר (איטי יותר)", "story_off": "כבוי", "players": "שחקנים", "add_player": "הוספת שחקן", "player_name": "שם השחקן", "character": "דמות", "remove": "הסרה", "strength": "עוצמה", "craft": "מיומנות", "lives": "חיים", "fate": "גורל", "gold": "זהב", "start_game": "התחלת המשחק", "need_player": "הוסיפו לפחות שחקן אחד.", "look_btn": "להראות למנחה", "look_hint": "צלמו קלף שנשלף או קוביות שנעצרו.", "looking": "המנחה מסתכל…", "gm_unavailable": "המנחה (Claude) לא זמין בתצוגה הזו. הקרבות והקריינות עובדים כרגיל.", "gm_no_images": "התצוגה הזו לא יכולה לשלוח תמונות למנחה.", "gm_denied": "לא ניתן אישור להשתמש ב־Claude. אפשר לשנות זאת בהרשאות של הדף.", "gm_limit": "הגעתם למגבלת השימוש ב־Claude כרגע. נסו שוב מאוחר יותר.", "gm_error": "המנחה לא הצליח לענות. נסו שוב.", "seen": "המנחה רואה:", "card_for": "מי שלף את הקלף?", "confirm_card": "כן, זה הקלף", "retake": "צילום חוזר", "type_card_instead": "הקלדת הקלף ביד", "card_name": "שם הקלף", "card_text": "טקסט הקלף", "card_type": "סוג הקלף", "type_enemy": "יריב", "type_object": "חפץ", "type_magic_object": "חפץ קסום", "type_follower": "בן לוויה", "type_place": "מקום", "type_stranger": "זר", "type_event": "אירוע", "type_spell": "כישוף", "type_other": "אחר", "dice_seen": "על הקוביות:", "use_as_enemy": "קוביית {enemy}: {n}", "use_as_player": "הקובייה של {player}: {n}", "dice_no_battle": "אין קרב שמחכה לקוביות, ולכן התוצאה לא נרשמה.", "low_confidence": "המנחה לא בטוח. בדקו לפני שאתם מאשרים.", "problem": "מה לא נראה טוב:", "close": "סגירה", "cancel": "ביטול", "battle": "קרב", "combat_type": "סוג הקרב", "enemy_name": "שם היריב", "enemy_value": "ערך היריב", "weapon_bonus": "בונוס נשק", "other_bonus": "בונוסים אחרים", "has_armour": "יש שריון או חפץ מגן", "begin_battle": "התחלת הקרב", "total": "סך הכול", "reroll": "הטלה חוזרת בעזרת גורל", "resolve": "הכרעה", "armour_question": "האם השריון הגן?", "saved": "כן, הגן", "not_saved": "לא הגן", "photo_dice": "צילום הקוביות", "outcome_player_wins": "ניצחון", "outcome_enemy_wins": "תבוסה", "outcome_standoff": "תיקו", "at_village": "בכפר, לפני החזרה למסע", "buy_lives": "קניית חיים", "buy_lives_note": "נקודת חיים עולה מטבע זהב אחד. זהב: {gold}", "no_gold_note": "אין זהב: מגיעה נקודת חיים אחת בחינם.", "free_life": "קבלת נקודת חיים", "eliminated": "הודח", "undo": "ביטול הפעולה האחרונה", "undone": "הפעולה בוטלה", "pause": "השהיה", "resume_voice": "המשך", "replay": "השמעה חוזרת", "story_log": "ספר המסע", "settings": "הגדרות", "voice": "קול", "speed": "מהירות דיבור", "mute": "השתקה", "gm_writing": "המנחה כותב…", "tell_story": "המשך הסיפור", "story_rejected": "הקטע של המנחה הוזכר בו מספר, ולכן הוא לא נשמר. שורת החוקים נשארת.", "story_empty": "הסיפור יתחיל ברגע שיקרה משהו על הלוח.", "privacy_photo": "התמונה נשלחת ל־Claude רק כשמצלמים, ואינה נשמרת.", "usage_note": "המנחה משתמש בחשבון Claude שלך: בלי מפתח ובלי תשלום נוסף, לפי מגבלות התוכנית שלך.", "lives_minus": "פחות חיים", "lives_plus": "יותר חיים", "gold_minus": "פחות זהב", "gold_plus": "יותר זהב", "home": "מסך הבית", "delete_game": "מחיקה", "confirm_delete": "למחוק את המשחק? לחצו שוב לאישור.", "waiting_dice": "ממתין לקוביות", "example": "לדוגמה", "disclaimer": "כלי עזר לא רשמי לשולחן. אינו קשור ל־Games Workshop.", "test_voice": "בדיקת קול", "voice_sample": "בדיקת קול. אם שומעים אותי, המספר מוכן להרפתקה.", "voice_auto": "אוטומטי (לפי השפה)", "voice_status": "קולות בעברית במכשיר: {n} מתוך {all}. קול בשימוש: {voice}.", "no_speech": "התצוגה הזו לא מאפשרת הקראה. נסו לפתוח את הדף ב־Safari דרך claude.ai.", "no_voice_ios": "לא נמצא במכשיר קול בעברית. אפשר להתקין אחד בחינם: הגדרות ← נגישות ← תוכן מדובר ← קולות ← עברית.", "no_voice_android": "לא נמצא במכשיר קול בעברית. אפשר להתקין אחד בחינם: הגדרות ← נגישות ← המרת טקסט לדיבור ← מנוע Google ← התקנת נתוני קול ← עברית.", "no_voice_windows": "במחשב הזה אין קול בעברית. אפשר להתקין אחד בחינם: הגדרות Windows ← זמן ושפה ← דיבור ← ניהול קולות ← הוספת קולות ← עברית. אחר כך סגרו ופתחו מחדש את הדפדפן. אפשרות נוספת: לפתוח את הדף ב־Microsoft Edge, שבו יש קולות מוכנים.", "no_voice_mac": "במחשב הזה אין קול בעברית. אפשר להתקין אחד בחינם: הגדרות המערכת ← נגישות ← תוכן מדובר ← קול המערכת ← ניהול קולות ← עברית.", "no_voice_other": "לא נמצא במכשיר קול בעברית. התקינו קול עברי בהגדרות ההקראה של המכשיר.", "voice_tip_ios": "קול באייפון: הגדרות ← נגישות ← תוכן מדובר ← קולות ← עברית — הורידו קול ״משופר״ או ״פרימיום״ ובחרו בו. אחר כך סגרו לגמרי את Safari (או את האפליקציה הזו) בהחלקה למעלה ופתחו מחדש. כאן, בשדה ״קול״, השאירו ״כמו בהגדרות האייפון״ או בחרו קול מהרשימה.", "voice_tip_android": "לקול טבעי יותר: הגדרות ← נגישות ← המרת טקסט לדיבור, והתקינו את נתוני הקול של Google לעברית ולרוסית.", "voice_tip_windows": "במחשב Windows הקולות הטבעיים ביותר נמצאים ב־Microsoft Edge (קולות ״Online (Natural)״), בחינם. אפשר גם להוסיף קולות: הגדרות ← זמן ושפה ← דיבור ← ניהול קולות.", "voice_tip_mac": "לקול טבעי יותר: הגדרות המערכת ← נגישות ← תוכן מדובר ← קול המערכת ← ניהול קולות, ובחרו קול ״משופר״ או ״פרימיום״.", "voice_tip_other": "הקולות מגיעים מהמכשיר עצמו. אפשר להתקין קולות נוספים בהגדרות ההקראה של המכשיר.", "voice_natural_hint": "הקול הנוכחי הוא קול בסיסי. לקול אנושי יותר בחינם: במחשב, פתחו את הדף ב־Microsoft Edge (קולות ״Natural״); באייפון, הורידו קול ״פרימיום״ בהגדרות ← נגישות ← תוכן מדובר ← קולות.", "place": "איפה אנחנו? (משנה את המוזיקה)", "scene_road": "דרך", "scene_village": "כפר", "scene_city": "עיר", "scene_tavern": "פונדק", "scene_forest": "יער", "scene_graveyard": "בית קברות", "scene_inner": "האזור הפנימי", "music_on": "הפעלת מוזיקה", "music_off": "השתקת מוזיקה", "music_volume": "עוצמת המוזיקה", "own_music": "המוזיקה שלכם", "own_music_hint": "אפשר לבחור קובץ מוזיקה לכל מקום. הקובץ נשמר רק במכשיר הזה ומתנגן בלולאה.", "builtin_music": "מוזיקה מובנית", "choose_file": "בחירת קובץ", "loading_file": "טוען…", "file_failed": "לא הצלחנו לנגן את הקובץ הזה. נסו MP3 או M4A.", "not_saved_device": "מתנגן, אבל לא נשמר במכשיר", "scene_battle": "קרב", "scene_mystic": "קרב מיומנות", "sources_hint": "מוזיקה ימי־ביניימית חינמית:", "live_btn": "מצלמה חיה", "live_hint": "העמידו את הטלפון על מעמד כך שהמצלמה תביט במקום ליד הלוח. הניחו שם את הקלף שנשלף והטילו שם את הקוביות — אחת בכל פעם. המנחה ישים לב בעצמו.", "live_turn": "התור של:", "live_calm": "צופה בשולחן…", "live_moving": "יש תנועה…", "live_settling": "מחכה שהכול ייעצר…", "live_dark": "חשוך מדי — המצלמה לא רואה.", "live_looking": "המנחה מסתכל… {s} שנ׳", "live_nothing": "שום דבר חדש. {seen}", "live_same_card": "הקלף הזה כבר נקרא.", "live_wait": "מגבלת החינם של Google: ממתין {s} שניות.", "live_dice_no_battle": "קוביות: {dice}. אין כרגע קרב.", "live_low": "לא בטוח שקראתי נכון — בדקו ולחצו „כן, עכשיו”.", "live_card": "קלף חדש: {card} — {player}", "live_battle": "קרב: {player} ⚔ {enemy} · {type} {value}", "live_die_enemy": "קוביית היריב ({enemy}): {n}", "live_die_player": "הקובייה של {player}: {n}", "live_die_reroll": "הטלה חוזרת — {player}: {n}", "live_which": "שתי קוביות — איזו של מי?", "live_ok": "כן, עכשיו", "live_edit": "לשנות", "live_look_now": "להסתכל עכשיו", "live_stop": "לכבות מצלמה", "live_stopped": "המצלמה נעצרה. לחצו „מצלמה חיה” כדי להמשיך.", "live_denied": "אין גישה למצלמה. אפשרו מצלמה לאתר: הגדרות ← Safari ← מצלמה.", "live_need_key": "למצלמה החיה צריך מפתח חינמי של Google (במסך הראשי).", "gm_bad_key": "מפתח Google לא התקבל. בדקו אותו במסך הראשי.", "gm_network": "אין חיבור לאינטרנט.", "gm_limit_site": "המכסה החינמית של Google נגמרה לעכשיו. חכו דקה.", "gm_unavailable_site": "המנחה כבוי: הוסיפו מפתח חינמי של Google במסך הראשי. קרבות וסיפור עובדים גם בלעדיו.", "privacy_photo_site": "התמונות נשלחות ל‑Google Gemini עם המפתח שלכם ולא נשמרות כאן. בתוכנית החינמית Google עשויה להשתמש בהן לשיפור השירותים שלה.", "usage_note_site": "המנחה פועל עם המפתח החינמי שלכם של Google Gemini.", "music_pack": "לטעון את כל המוזיקה בבת אחת", "music_pack_done": "נטענו מקומות: {n}", "key_title": "מפתח למנחה · Google AI (בחינם)", "key_get": "לקבל מפתח חינמי", "key_privacy": "המפתח נשמר רק בטלפון הזה. בתוכנית החינמית Google עשויה להשתמש בתמונות לשיפור השירותים שלה.", "key_checking": "בודק…", "key_ok": "המפתח עובד", "key_bad": "המפתח לא התקבל", "key_limit": "המפתח תקין, אבל המכסה נגמרה לעכשיו", "key_unchecked": "נשמר, אבל לא הצלחתי לבדוק (אין אינטרנט?)", "key_change": "להחליף מפתח", "reading_text": "קורא ומתרגם את טקסט הקלף…", "text_unreadable": "לא הצלחתי לקרוא את טקסט הקלף.", "voice_auto_ios": "כמו בהגדרות האייפון"}, "ru": {"app_name": "Рассказчик", "tagline": "Ведущий за игровым столом: видит, считает и рассказывает", "new_game": "Новая игра", "saved_games": "Сохранённые игры", "no_saved": "Сохранённых игр пока нет.", "continue_game": "Продолжить", "storage_account": "Игры сохраняются в вашем аккаунте Claude, только для вас.", "storage_browser": "Игры сохраняются только в этом браузере.", "storage_memory": "Сохранение здесь недоступно: игра пропадёт, когда страница закроется.", "edition": "Издание", "edition_fifth": "5-е издание", "edition_revised_4th": "4-е исправленное издание", "intensity": "Стиль рассказа", "intensity_minimal": "Кратко", "intensity_balanced": "Сбалансированно", "intensity_cinematic": "Кинематографично", "storyteller": "Ведущий рассказывает", "story_fast": "Быстро", "story_rich": "Подробно (медленнее)", "story_off": "Выключено", "players": "Игроки", "add_player": "Добавить игрока", "player_name": "Имя игрока", "character": "Персонаж", "remove": "Убрать", "strength": "Сила", "craft": "Мастерство", "lives": "Жизни", "fate": "Судьба", "gold": "Золото", "start_game": "Начать игру", "need_player": "Добавьте хотя бы одного игрока.", "look_btn": "Показать ведущему", "look_hint": "Сфотографируйте вытянутую карту или остановившиеся кубики.", "looking": "Ведущий смотрит…", "gm_unavailable": "Ведущий (Claude) здесь недоступен. Бои и рассказ работают как обычно.", "gm_no_images": "Отсюда нельзя отправлять фотографии ведущему.", "gm_denied": "Использование Claude не разрешено. Это можно изменить в разрешениях страницы.", "gm_limit": "Сейчас достигнут лимит использования Claude. Попробуйте позже.", "gm_error": "Ведущий не смог ответить. Попробуйте ещё раз.", "seen": "Ведущий видит:", "card_for": "Кто вытянул карту?", "confirm_card": "Да, это карта", "retake": "Переснять", "type_card_instead": "Ввести карту вручную", "card_name": "Название карты", "card_text": "Текст карты", "card_type": "Тип карты", "type_enemy": "Враг", "type_object": "Предмет", "type_magic_object": "Магический предмет", "type_follower": "Спутник", "type_place": "Место", "type_stranger": "Незнакомец", "type_event": "Событие", "type_spell": "Заклинание", "type_other": "Другое", "dice_seen": "На кубиках:", "use_as_enemy": "Кубик врага ({enemy}): {n}", "use_as_player": "Кубик игрока {player}: {n}", "dice_no_battle": "Сейчас нет боя, который ждёт кубиков, поэтому результат не записан.", "low_confidence": "Ведущий не уверен. Проверьте, прежде чем подтверждать.", "problem": "Что видно плохо:", "close": "Закрыть", "cancel": "Отмена", "battle": "Бой", "combat_type": "Тип боя", "enemy_name": "Противник", "enemy_value": "Значение противника", "weapon_bonus": "Бонус оружия", "other_bonus": "Другие бонусы", "has_armour": "Есть доспех или защитный предмет", "begin_battle": "Начать бой", "total": "Итог", "reroll": "Перебросить за Судьбу", "resolve": "Подвести итог", "armour_question": "Доспех защитил?", "saved": "Да, защитил", "not_saved": "Не защитил", "photo_dice": "Сфотографировать кубики", "outcome_player_wins": "Победа", "outcome_enemy_wins": "Поражение", "outcome_standoff": "Ничья", "at_village": "В Деревне, перед возвращением в путь", "buy_lives": "Купить жизни", "buy_lives_note": "Одна жизнь стоит одну монету. Золото: {gold}", "no_gold_note": "Золота нет: одна жизнь бесплатно.", "free_life": "Получить жизнь", "eliminated": "Выбыл", "undo": "Отменить последнее", "undone": "Действие отменено", "pause": "Пауза", "resume_voice": "Продолжить", "replay": "Повторить", "story_log": "Летопись", "settings": "Настройки", "voice": "Голос", "speed": "Скорость речи", "mute": "Без звука", "gm_writing": "Ведущий пишет…", "tell_story": "Продолжить историю", "story_rejected": "В тексте ведущего оказались числа, поэтому он не сохранён. Остаётся строка правил.", "story_empty": "История начнётся, как только на поле что-то произойдёт.", "privacy_photo": "Фото отправляется Claude только когда вы снимаете, и не сохраняется.", "usage_note": "Ведущий использует ваш аккаунт Claude: без ключа и без доплаты, в пределах вашего тарифа.", "lives_minus": "Меньше жизней", "lives_plus": "Больше жизней", "gold_minus": "Меньше золота", "gold_plus": "Больше золота", "home": "На главную", "delete_game": "Удалить", "confirm_delete": "Удалить игру? Нажмите ещё раз для подтверждения.", "waiting_dice": "Ждём кубики", "example": "пример", "disclaimer": "Неофициальный помощник для игрового стола. Не связан с Games Workshop.", "test_voice": "Проверить голос", "voice_sample": "Проверка голоса. Если вы меня слышите, рассказчик готов к приключению.", "voice_auto": "Автоматически (по языку)", "voice_status": "Русских голосов на устройстве: {n} из {all}. Используется: {voice}.", "no_speech": "Здесь озвучка недоступна. Попробуйте открыть страницу в Safari через claude.ai.", "no_voice_ios": "На устройстве не найден русский голос. Его можно установить бесплатно: Настройки → Универсальный доступ → Устный контент → Голоса → Русский.", "no_voice_android": "На устройстве не найден русский голос. Его можно установить бесплатно: Настройки → Специальные возможности → Синтез речи → Google → Установить голосовые данные → Русский.", "no_voice_windows": "На этом компьютере нет русского голоса. Его можно установить бесплатно: Параметры Windows → Время и язык → Речь → Управление голосами → Добавить голоса → Русский. Потом закройте и снова откройте браузер. Или откройте страницу в Microsoft Edge: там русские голоса уже есть.", "no_voice_mac": "На этом компьютере нет русского голоса. Его можно установить бесплатно: Системные настройки → Универсальный доступ → Устный контент → Системный голос → Управление голосами → Русский.", "no_voice_other": "На устройстве не найден русский голос. Установите русский голос в настройках синтеза речи.", "voice_tip_ios": "Голос на iPhone: Настройки → Универсальный доступ → Устный контент → Голоса → Русский — скачайте «улучшенный» или «премиум» голос и выберите его. Затем полностью закройте Safari (или это приложение) смахиванием вверх и откройте снова. Здесь в поле «Голос» оставьте «Как в настройках iPhone» или выберите голос из списка.", "voice_tip_android": "Для более живого голоса: Настройки → Специальные возможности → Синтез речи, установите голосовые данные Google для русского и иврита.", "voice_tip_windows": "На компьютере с Windows самые естественные голоса есть в Microsoft Edge (голоса «Online (Natural)»), бесплатно. Голоса можно и добавить: Параметры → Время и язык → Речь → Управление голосами.", "voice_tip_mac": "Для более живого голоса: Системные настройки → Универсальный доступ → Устный контент → Системный голос → Управление голосами, выберите «улучшенный» или «премиум» голос.", "voice_tip_other": "Голоса берутся из самого устройства. Дополнительные голоса устанавливаются в настройках синтеза речи.", "voice_natural_hint": "Сейчас используется простой голос. Для более живого голоса бесплатно: на компьютере откройте страницу в Microsoft Edge (голоса «Natural»); на iPhone скачайте «премиум» голос в Настройки → Универсальный доступ → Устный контент → Голоса.", "place": "Где мы? (меняет музыку)", "scene_road": "Дорога", "scene_village": "Деревня", "scene_city": "Город", "scene_tavern": "Таверна", "scene_forest": "Лес", "scene_graveyard": "Кладбище", "scene_inner": "Внутренний круг", "music_on": "Включить музыку", "music_off": "Выключить музыку", "music_volume": "Громкость музыки", "own_music": "Своя музыка", "own_music_hint": "Для каждого места можно выбрать свой музыкальный файл. Он хранится только на этом устройстве и играет по кругу.", "builtin_music": "Встроенная музыка", "choose_file": "Выбрать файл", "loading_file": "Загрузка…", "file_failed": "Не удалось воспроизвести этот файл. Попробуйте MP3 или M4A.", "not_saved_device": "играет, но не сохранён на устройстве", "scene_battle": "Бой", "scene_mystic": "Бой Мастерства", "sources_hint": "Бесплатная средневековая музыка:", "live_btn": "Живая камера", "live_hint": "Поставьте телефон на подставку так, чтобы камера смотрела на место рядом с полем. Кладите туда вытянутую карту и бросайте там кубики — по одному. Ведущий заметит сам.", "live_turn": "Чей ход:", "live_calm": "Смотрю на стол…", "live_moving": "Вижу движение…", "live_settling": "Жду, пока всё остановится…", "live_dark": "Слишком темно — камере ничего не видно.", "live_looking": "Ведущий смотрит… {s} с", "live_nothing": "Ничего нового. {seen}", "live_same_card": "Эта карта уже прочитана.", "live_wait": "Бесплатный лимит Google: жду {s} с.", "live_dice_no_battle": "Кубики: {dice}. Боя сейчас нет.", "live_low": "Не уверен, что прочитал верно — проверьте и нажмите «Да, сейчас».", "live_card": "Новая карта: {card} — {player}", "live_battle": "Бой: {player} ⚔ {enemy} · {type} {value}", "live_die_enemy": "Кубик врага ({enemy}): {n}", "live_die_player": "Кубик — {player}: {n}", "live_die_reroll": "Переброс — {player}: {n}", "live_which": "Два кубика — какой чей?", "live_ok": "Да, сейчас", "live_edit": "Изменить", "live_look_now": "Посмотреть сейчас", "live_stop": "Выключить камеру", "live_stopped": "Камера остановилась. Нажмите «Живая камера», чтобы продолжить.", "live_denied": "Нет доступа к камере. Разрешите камеру для этого сайта: Настройки → Safari → Камера.", "live_need_key": "Для живой камеры нужен бесплатный ключ Google (на главном экране).", "gm_bad_key": "Ключ Google не подошёл. Проверьте его на главном экране.", "gm_network": "Нет связи с интернетом.", "gm_limit_site": "Бесплатный лимит Google на сейчас исчерпан. Подождите минуту.", "gm_unavailable_site": "Ведущий выключен: добавьте бесплатный ключ Google на главном экране. Бои и рассказ работают и без него.", "privacy_photo_site": "Снимки отправляются в Google Gemini по вашему ключу и не сохраняются здесь. На бесплатном тарифе Google может использовать их для улучшения своих сервисов.", "usage_note_site": "Ведущий работает на вашем бесплатном ключе Google Gemini.", "music_pack": "Загрузить всю музыку сразу", "music_pack_done": "Загружено мест: {n}", "key_title": "Ключ ведущего · Google AI (бесплатно)", "key_get": "Получить бесплатный ключ", "key_privacy": "Ключ хранится только на этом телефоне. На бесплатном тарифе Google может использовать снимки для улучшения своих сервисов.", "key_checking": "Проверяю…", "key_ok": "Ключ работает", "key_bad": "Ключ не подошёл", "key_limit": "Ключ верный, но лимит сейчас исчерпан", "key_unchecked": "Сохранён, но проверить не удалось (нет интернета?)", "key_change": "Изменить ключ", "reading_text": "Читаю и перевожу текст карты…", "text_unreadable": "Текст карты прочитать не удалось.", "voice_auto_ios": "Как в настройках iPhone"}}, "narration": {"he": {"_meta": {"language": "he", "direction": "rtl", "status": "draft — needs native-speaker review; phrasing avoids gendered verbs because player gender is not yet modelled; enemy names assumed grammatically masculine — needs a gender field in the card glossary", "terms_source": "Hebrew 5th edition box (confirmed by owner)"}, "terms": {"strength": "עוצמה", "craft": "מיומנות", "life": "נקודת חיים", "fate": "גורל"}, "player_joined": {"balanced": ["ברוכים הבאים למסע, {player}! הדמות: {character}.", "דמות חדשה על הלוח: {character}, בהנהגת {player}."]}, "combat_started": {"minimal": ["קרב {combat_type_term}: {player} מול {enemy} ({enemy_value})."], "balanced": ["{enemy} חוסם את הדרך. קרב {combat_type_term} מתחיל — {combat_type_term_def} של היריב: {enemy_value_word}.", "מן הצללים מגיח {enemy}; {combat_type_term_def} שלו: {enemy_value_word}. זהו קרב {combat_type_term}."], "cinematic": ["האוויר מצטנן. {enemy} מגיח מן הצללים, וטפריו שורטים את האבן. {combat_type_term_def} שלו: {enemy_value_word} — קרב {combat_type_term} מתחיל!", "אדמה רועדת תחת רגלי {enemy}. {combat_type_term_def} שלו, {enemy_value_word}, עומדת מול {player}. הגיע הזמן לקרב {combat_type_term}."]}, "enemy_rolled": {"minimal": ["{enemy}: קובייה {roll}, סך הכול {total}."], "balanced": ["{enemy} מטיל את הקובייה... {roll_word}! סך התקיפה: {total_word}. {player_prompt}", "הקובייה של {enemy} נעצרת על {roll_word}. סך הכול {total_word}. {player_prompt}"]}, "player_prompt": "{player}, תורך להטיל את הקובייה.", "player_rolled": {"minimal": ["{player}: קובייה {roll}."], "balanced": ["הקובייה של {player} נעצרת על {roll_word}.", "{roll_word}! זו התוצאה של {player}."]}, "fate_reroll": {"balanced": ["הגורל מתערב! הטלה חוזרת: {roll_word}. נקודות גורל שנותרו: {fate_left}."]}, "protection_check": {"balanced": ["{enemy} גובר — {enemy_total} מול {player_total}. {player}, בדקו אם השריון מגן, ודווחו על התוצאה."]}, "combat_resolved": {"player_wins": {"minimal": ["ניצחון ל־{player}: {player_total} מול {enemy_total}."], "balanced": ["{player_total_word} מול {enemy_total_word} — הניצחון של {player}! {enemy} נופל.", "{player} מכריע את {enemy}: {player_total_word} מול {enemy_total_word}."], "cinematic": ["פלדה פוגשת עצם, ו־{enemy} קורס ארצה. {player_total_word} מול {enemy_total_word} — הניצחון של {player}! היער נושם לרווחה."]}, "enemy_wins": {"minimal": ["{enemy} גובר: {enemy_total} מול {player_total}. המחיר: {lives_lost_words}. נותרו: {lives_left}."], "balanced": ["{enemy} גובר — {enemy_total_word} מול {player_total_word}. המחיר: {lives_lost_words}. נקודות חיים שנותרו ל־{player}: {lives_left}.", "{player_total_word} מול {enemy_total_word} — היתרון ל־{enemy}. המחיר: {lives_lost_words}. נקודות חיים שנותרו ל־{player}: {lives_left}."], "cinematic": ["{enemy_total_word} מול {player_total_word}. טפרים פוגעים, והמחיר כבד: {lives_lost_words}. היצור נסוג אל החשכה. נקודות חיים שנותרו ל־{player}: {lives_left}."]}, "enemy_wins_protected": {"balanced": ["{enemy} גובר, אבל {protection} עומד במכה! אף נקודת חיים לא אבדה."]}, "standoff": {"minimal": ["תיקו: {player_total} מול {enemy_total}."], "balanced": ["{player_total_word} מול {enemy_total_word} — תיקו. איש אינו נסוג, ואיש אינו נפגע."]}, "eliminated": "המסע של {player} הגיע לסופו.", "respawn": "זה לא הסוף: {player} — חזרה לכפר. בתור הבא אפשר לקנות נקודות חיים בזהב."}, "player_recovered": {"paid": {"balanced": ["חזרה למסע! {player} — נקודות חיים: {lives_bought}. זהב שנותר: {gold_left}."]}, "free": {"balanced": ["אין זהב, אבל הכפר רחום: נקודת חיים אחת בחינם ל־{player}. בחזרה למסע!"]}}, "card_drawn": {"enemy": {"minimal": ["{player}: יריב — {card_name}. {card_text}"], "balanced": ["קלף חדש עבור {player} — ויריב בדרך: {card_name}! {card_text}", "הקלף נחשף, ומול {player} עומד יריב: {card_name}. {card_text}"], "cinematic": ["הקלף מתהפך... ומן החשכה מגיח {card_name}! {card_text}"]}, "other": {"minimal": ["{player}: קלף «{card_name}». {card_text}"], "balanced": ["קלף חדש עבור {player}: «{card_name}». {card_text}"], "cinematic": ["הגורל פותח דף חדש: «{card_name}». {card_text}"]}}}, "ru": {"_meta": {"language": "ru", "direction": "ltr", "status": "draft — needs native-speaker review; present tense used to avoid gendered past-tense verbs", "terms_source": "No Russian 5th edition exists; Мастерство chosen to match Hebrew מיומנות (skill)"}, "terms": {"strength": "Сила", "craft": "Мастерство", "life": "жизнь", "fate": "Судьба"}, "player_joined": {"balanced": ["{player} вступает в путь в образе героя: {character}.", "Новый герой на поле — {character}. Ведёт его {player}."]}, "combat_started": {"minimal": ["Бой ({combat_type_term}): {player} против {enemy} ({enemy_value})."], "balanced": ["{enemy} преграждает путь. Начинается бой — {combat_type_term}. Мощь врага: {enemy_value_word}.", "Из тени выходит {enemy}, его мощь — {enemy_value_word}. Бой начинается: {combat_type_term}!"], "cinematic": ["Воздух стынет. Из тени выползает {enemy}, когти скребут по камню. Его мощь — {enemy_value_word}. Бой начинается!", "Земля дрожит под шагами врага: {enemy}. Мощь {enemy_value_word} против отваги героя по имени {player}."]}, "enemy_rolled": {"minimal": ["{enemy}: кубик {roll}, итог {total}."], "balanced": ["{enemy} бросает кубик... {roll_word}! Сила удара — {total_word}. {player_prompt}", "Кубик врага замирает на числе {roll_word}. Итог — {total_word}. {player_prompt}"]}, "player_prompt": "{player}, ваш бросок!", "player_rolled": {"minimal": ["{player}: кубик {roll}."], "balanced": ["Кубик замирает: {roll_word}.", "{roll_word}! Таков бросок героя по имени {player}."]}, "fate_reroll": {"balanced": ["Судьба вмешивается! Новый бросок: {roll_word}. Очков Судьбы осталось: {fate_left}."]}, "protection_check": {"balanced": ["{enemy} сильнее — {enemy_total} против {player_total}. {player}, проверьте защиту доспеха и сообщите результат."]}, "combat_resolved": {"player_wins": {"minimal": ["Победа: {player}, {player_total} против {enemy_total}."], "balanced": ["{player_total_word} против {enemy_total_gen} — {player} побеждает! Враг повержен.", "{player} одолевает врага по имени {enemy}: {player_total_word} против {enemy_total_gen}."], "cinematic": ["Сталь встречает кость, и {enemy} рушится наземь. {player_total_word} против {enemy_total_gen} — победа за героем по имени {player}! Лес облегчённо вздыхает."]}, "enemy_wins": {"minimal": ["{enemy} побеждает: {enemy_total} против {player_total}. −{lives_lost}, осталось {lives_left}."], "balanced": ["{enemy} берёт верх — {enemy_total_word} против {player_total_gen}. {player} теряет {lives_lost_words}. Осталось: {lives_left_words}.", "{enemy_total_word} против {player_total_gen} — перевес на стороне врага. {player} теряет {lives_lost_words}. Осталось: {lives_left_words}."], "cinematic": ["{enemy_total_word} против {player_total_gen}. Когти находят цель, и {player} теряет {lives_lost_words}. Тварь отступает во тьму. Осталось: {lives_left_words}."]}, "enemy_wins_protected": {"balanced": ["{enemy} берёт верх, но {protection} выдерживает удар! Ни одна жизнь не потеряна."]}, "standoff": {"minimal": ["Ничья: {player_total} против {enemy_total}."], "balanced": ["{player_total_word} против {enemy_total_gen} — ничья. Никто не отступает, никто не ранен."]}, "eliminated": "Путь героя по имени {player} окончен.", "respawn": "Но это не конец: {player} возвращается в Деревню. В следующий ход можно купить жизни за золото."}, "player_recovered": {"paid": {"balanced": ["{player} снова в пути! Куплено в Деревне: {lives_bought_words}. Золота осталось: {gold_left}."]}, "free": {"balanced": ["Золота нет, но Деревня милосердна: {player} получает одну жизнь даром. Снова в путь!"]}}, "card_drawn": {"enemy": {"minimal": ["{player}: враг — {card_name}. {card_text}"], "balanced": ["{player} тянет карту — и это враг: {card_name}! {card_text}", "Карта открыта, и перед героем по имени {player} встаёт враг: {card_name}. {card_text}"], "cinematic": ["Карта переворачивается... Из тьмы выходит {card_name}! {card_text}", "Тишину разрывает рёв: {card_name} преграждает путь. {card_text}"]}, "other": {"minimal": ["{player}: карта «{card_name}». {card_text}"], "balanced": ["{player} тянет карту: «{card_name}». {card_text}", "Новая карта для героя по имени {player}: «{card_name}». {card_text}"], "cinematic": ["Судьба открывает новую страницу: «{card_name}». {card_text}"]}}}}, "tracks": {}, "site": true, "loops": {"road": 117.95, "village": 38.94, "city": 43.4375, "tavern": 36.0361, "forest": 91.45, "graveyard": 56.6193, "inner": 137.95, "battle": 14.0115}};
 </script>
 <script>
 /* Rules engine — JavaScript port of backend/talisman (session.py, rules/combat.py,
@@ -926,7 +928,7 @@ ${how} Say what it shows that matters to the game.
 ${situation(state)}
 
 Identify ONE of these:
-- "card": a single game card is the main subject. Copy its Hebrew title and rules text exactly as printed (name_he, text_he), and translate both into natural Russian (name_ru, text_ru) that a family can read aloud (keep every number, condition and effect; add nothing). For an enemy card, give its combat type ("strength" if its value is labelled עוצמה, "craft" if מיומנות) and its printed value.
+- "card": a single game card is the main subject. Copy its Hebrew title exactly as printed (name_he) and translate the title into Russian (name_ru). Do not copy the rules text now (that is done separately). For an enemy card, give its combat type ("strength" if its value is labelled עוצמה, "craft" if מיומנות) and its printed value.
 - "dice": one or more six-sided dice that have stopped rolling. Give the top face of each die you can see clearly. Leave out any die that is tilted, blurred, covered or cut off, and say so in "problem".
 - "other": something else on the board (describe it briefly).
 - "unclear": you cannot tell reliably.
@@ -936,9 +938,9 @@ ${auto ? `If dice are visible and a battle is waiting for dice, answer "dice" ev
 
 ${GLOSSARY}
 
-Reply with only this JSON:
-{"kind":"card|dice|other|unclear","seen":"one short sentence in ${LANG_NAME[lang]} describing what you see",
- "card":{"name_he":"","text_he":"","name_ru":"","text_ru":"","card_type":"${CARD_TYPES.join("|")}","combat_type":"strength|craft|null","enemy_value":null} or null,
+Answer fast and short. Reply with only this JSON:
+{"kind":"card|dice|other|unclear","seen":"a few words in ${LANG_NAME[lang]}",
+ "card":{"name_he":"","name_ru":"","card_type":"${CARD_TYPES.join("|")}","combat_type":"strength|craft|null","enemy_value":null} or null,
  "dice":[4,2] or [],
  "confidence":"high|medium|low","problem":""}`;
   }
@@ -966,6 +968,24 @@ Reply with only this JSON:
       if (!out.dice.length) out.kind = "unclear";
     }
     return out;
+  }
+
+  // Second, slower step for a card: its rules text, copied and translated.
+  function readPrompt(card) {
+    return `This photo shows a card from the Hebrew-language box of the board game Talisman, 5th edition.
+It was identified as: "${card.name_he || card.name_ru}".
+Copy the card's Hebrew rules text exactly as printed (text_he) and translate it into natural Russian that a family can read aloud (text_ru): keep every number, condition and effect, add nothing. If the title above is misread, give the correct one in name_he and name_ru (Russian translation).
+If some text is unreadable, leave that part out and say so in "problem".
+
+${GLOSSARY}
+
+Reply with only this JSON:
+{"name_he":"","name_ru":"","text_he":"","text_ru":"","problem":""}`;
+  }
+  function cleanRead(raw) {
+    const r = raw && typeof raw === "object" ? raw : {};
+    const s = k => String(r[k] ?? "").trim().slice(0, 1500);
+    return { name_he: s("name_he"), name_ru: s("name_ru"), text_he: s("text_he"), text_ru: s("text_ru"), problem: s("problem").slice(0, 400) };
   }
 
   const LENGTH = { minimal: "one or two short sentences", balanced: "two or three sentences",
@@ -1016,9 +1036,15 @@ Reply with the passage only.`;
       return new GameMaster(sample, !!(lim && lim.images));
     }
 
+    // Quick model first; a stronger one only if the quick one cannot tell.
     async look(image, state, lang, signal) {
-      const raw = await this.sample.json(lookPrompt(state, lang), { images: [image], signal, cache: false });
-      return cleanLook(raw);
+      let res = cleanLook(await this.sample.json(lookPrompt(state, lang), { images: [image], signal, cache: false, modelTier: "quick" }));
+      if (res.kind === "unclear" || res.confidence === "low")
+        res = cleanLook(await this.sample.json(lookPrompt(state, lang), { images: [image], signal, cache: false }));
+      return res;
+    }
+    async readCard(image, card, signal) {
+      return cleanRead(await this.sample.json(readPrompt(card), { images: [image], signal, cache: false }));
     }
 
     /** Resolves {text} or {rejected: reason}. Streams through onText. */
@@ -1037,9 +1063,12 @@ Reply with the passage only.`;
   // camera but has no Claude. The key is the owner's own free key, kept on the phone.
   const GEMINI = "https://generativelanguage.googleapis.com/v1beta/models/";
   const MODELS = {                       // tried in order; the next one if a model is missing or out of quota
-    look: ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"],
+    look: ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash"],       // what is it? (short answer)
+    read: ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"],       // copy + translate card text
     tell: ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash", "gemini-2.5-flash-lite"],
   };
+  // Least thinking each model accepts: thinking is what makes answers slow.
+  const THINK = { "gemini-3.6-flash": "minimal", "gemini-3.5-flash-lite": "minimal", "gemini-3.8-flash": "low", "gemini-3.1-flash-lite": "low" };
   const gErr = (code, message, extra) => Object.assign(new Error(message || code), { code }, extra || {});
 
   async function blobToBase64(blob) {
@@ -1066,16 +1095,16 @@ Reply with the passage only.`;
     constructor(key, fetchFn) {
       this.key = String(key || "").trim(); this.fetch = fetchFn || root.fetch.bind(root);
       this.imagesOk = true; this.auto = true; this.kind = "gemini";
-      this.skip = { look: new Set(), tell: new Set() };   // models that answered "not found"
-      this.thinking = true;                               // send a low thinking level until a model refuses it
+      this.skip = { look: new Set(), read: new Set(), tell: new Set() };   // models that answered "not found"
+      this.noThink = new Set();                           // models that refused the thinking setting
     }
     async call(job, parts, { json = false, signal } = {}) {
       let lastErr = null;
       for (const model of MODELS[job]) {
         if (this.skip[job].has(model)) continue;
-        const generationConfig = { temperature: job === "look" ? 0.1 : 0.8, maxOutputTokens: 4096 };
+        const generationConfig = { temperature: job === "tell" ? 0.8 : 0.1, maxOutputTokens: job === "look" ? 1024 : 4096 };
         if (json) generationConfig.responseMimeType = "application/json";
-        if (this.thinking && /^gemini-3/.test(model)) generationConfig.thinkingConfig = { thinkingLevel: "low" };
+        if (THINK[model] && !this.noThink.has(model)) generationConfig.thinkingConfig = { thinkingLevel: THINK[model] };
         let res, body;
         if (signal && signal.aborted) throw gErr("cancelled");
         try {
@@ -1096,8 +1125,8 @@ Reply with the passage only.`;
         }
         const msg = String(body && body.error && body.error.message || res.status);
         const reason = JSON.stringify(body && body.error && body.error.details || "");
-        if (res.status === 400 && /thinking/i.test(msg) && this.thinking) {      // this model does not take a thinking level
-          this.thinking = false; return this.call(job, parts, { json, signal });
+        if (res.status === 400 && /thinking/i.test(msg) && generationConfig.thinkingConfig) {   // this model does not take that level
+          this.noThink.add(model); return this.call(job, parts, { json, signal });
         }
         if ((res.status === 400 && /API_KEY_INVALID|API key not valid/i.test(msg + reason)) || res.status === 401 || res.status === 403)
           throw gErr("bad_key", msg);
@@ -1114,6 +1143,12 @@ Reply with the passage only.`;
         { inlineData: { mimeType: image.type || "image/jpeg", data } }], { json: true, signal });
       return cleanLook(parseJsonReply(text));
     }
+    async readCard(image, card, signal) {
+      const data = await blobToBase64(image);
+      const text = await this.call("read", [{ text: readPrompt(card) },
+        { inlineData: { mimeType: image.type || "image/jpeg", data } }], { json: true, signal });
+      return cleanRead(parseJsonReply(text));
+    }
     async tell(ctx, { onText, signal } = {}) {
       const t = (await this.call("tell", [{ text: tellPrompt(ctx) }], { signal })).trim();
       if (onText) onText({ text: t });
@@ -1125,7 +1160,7 @@ Reply with the passage only.`;
     async test() { await this.call("tell", [{ text: "Reply with the single word: ready" }]); return true; }
   }
 
-  const api = { GameMaster, GeminiMaster, MODELS, cleanLook, lookPrompt, tellPrompt, hasDigits, parseJsonReply };
+  const api = { GameMaster, GeminiMaster, MODELS, THINK, cleanLook, cleanRead, lookPrompt, readPrompt, tellPrompt, hasDigits, parseJsonReply };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.TMGameMaster = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);
 
@@ -1629,35 +1664,83 @@ Reply with the passage only.`;
   }
   const brightness = a => { let s = 0; for (let i = 0; i < a.length; i++) s += a[i]; return s / a.length; };
 
+  // Where two frames differ (same test as changed()), as a box in 0..1 units.
+  // Rows/columns with a single stray pixel are ignored, so sensor noise does not stretch it.
+  function changedBox(a, b, level = 24) {
+    let ma = 0, mb = 0;
+    for (let i = 0; i < a.length; i++) { ma += a[i]; mb += b[i]; }
+    const shift = (ma - mb) / a.length, rows = new Uint16Array(H), cols = new Uint16Array(W);
+    for (let i = 0; i < a.length; i++) if (Math.abs(a[i] - b[i] - shift) > level) { rows[(i / W) | 0]++; cols[i % W]++; }
+    const span = (arr) => { let lo = -1, hi = -1; for (let i = 0; i < arr.length; i++) if (arr[i] >= 2) { if (lo < 0) lo = i; hi = i; } return [lo, hi]; };
+    const [y0, y1] = span(rows), [x0, x1] = span(cols);
+    if (x0 < 0 || y0 < 0) return null;
+    return { x: x0 / W, y: y0 / H, w: (x1 - x0 + 1) / W, h: (y1 - y0 + 1) / H };
+  }
+
+  // Typical per-pixel difference between two frames (after removing a brightness shift).
+  function meanDiff(a, b) {
+    let ma = 0, mb = 0;
+    for (let i = 0; i < a.length; i++) { ma += a[i]; mb += b[i]; }
+    const shift = (ma - mb) / a.length;
+    let t = 0;
+    for (let i = 0; i < a.length; i++) t += Math.abs(a[i] - b[i] - shift);
+    return t / a.length;
+  }
+
   /** Decides when to look. feed() takes one grey frame and the time in ms and
-   *  returns "look" when a snapshot should be taken, otherwise null. */
+   *  returns null, or {box} when a snapshot should be taken (box = the part
+   *  that changed since the last look, in 0..1 units).
+   *  How different a pixel must be adapts to how grainy this camera is in this light. */
   class StillnessWatch {
     constructor(o = {}) {
       // counts of changed pixels in a 160x120 frame
       this.moveAt = o.moveAt ?? 60;       // more than this between frames = hands or dice moving
-      this.stillAt = o.stillAt ?? 15;     // at most this = settled (sensor noise)
-      this.stillMs = o.stillMs ?? 1100;   // settled this long = done moving
+      this.stillAt = o.stillAt ?? 15;     // at most this = settled
+      this.stillMs = o.stillMs ?? 900;    // settled this long = done moving
       this.changeAt = o.changeAt ?? 40;   // changed vs. the last look by more = worth looking again
       this.reset();
     }
-    reset() { this.prev = null; this.base = null; this.phase = "calm"; this.stillSince = 0; this.status = "calm"; }
+    reset() { this.prev = null; this.base = null; this.phase = "calm"; this.stillSince = 0; this.status = "calm";
+      this.grain = null; this.movingSince = 0; }
+    get level() { return Math.max(24, (this.grain || 0) * 3.5); }
     /** Treat the current picture as already seen (after a manual look). */
     seen(frame) { this.base = frame; }
     feed(frame, now) {
       const prev = this.prev; this.prev = frame;
       if (!prev) { this.base = this.base || frame; return null; }
       if (brightness(frame) < 18) { this.status = "dark"; return null; }
-      const d = changed(frame, prev);
-      if (d > this.moveAt) { this.phase = "moving"; this.stillSince = 0; this.status = "moving"; return null; }
+      const m = meanDiff(frame, prev);
+      if (this.grain == null) this.grain = m;
+      const d = changed(frame, prev, this.level);
+      if (d <= this.stillAt) this.grain = this.grain * 0.9 + m * 0.1;      // learn the grain only while nothing moves
+      if (d > this.moveAt) {
+        if (this.phase !== "moving") this.movingSince = now;
+        // "moving" for 10 s with no big change in the picture: the camera is grainier than thought
+        if (now - this.movingSince > 10000) { this.grain = Math.max(this.grain, m); this.movingSince = now; }
+        this.phase = "moving"; this.stillSince = 0; this.status = "moving"; return null;
+      }
       if (this.phase !== "moving") { this.status = "calm"; return null; }
       if (d > this.stillAt) { this.stillSince = 0; return null; }
       if (!this.stillSince) this.stillSince = now;
       if (now - this.stillSince < this.stillMs) { this.status = "settling"; return null; }
-      this.phase = "calm"; this.status = "calm";
-      if (this.base && changed(frame, this.base) < this.changeAt) return null;   // put back as it was
+      this.phase = "calm"; this.status = "calm"; this.movingSince = 0;
+      if (this.base && changed(frame, this.base, this.level) < this.changeAt) return null;   // put back as it was
+      const box = this.base ? changedBox(frame, this.base, this.level) : null;
       this.base = frame;
-      return "look";
+      return { box };
     }
+  }
+
+  /** The part of the picture to send: the changed box with generous margins,
+   *  never smaller than about half the frame (so the card is seen whole). */
+  function cropFor(box, vw, vh) {
+    if (!box) return { sx: 0, sy: 0, sw: vw, sh: vh };
+    let w = Math.max(box.w * 1.8, 0.5), h = Math.max(box.h * 1.8, 0.5);
+    const cx = box.x + box.w / 2, cy = box.y + box.h / 2;
+    w = Math.min(1, w); h = Math.min(1, h);
+    if (w * h > 0.7) return { sx: 0, sy: 0, sw: vw, sh: vh };
+    const x = Math.min(Math.max(0, cx - w / 2), 1 - w), y = Math.min(Math.max(0, cy - h / 2), 1 - h);
+    return { sx: Math.round(x * vw), sy: Math.round(y * vh), sw: Math.round(w * vw), sh: Math.round(h * vh) };
   }
 
   /** The camera itself (browser only). */
@@ -1710,16 +1793,17 @@ Reply with the passage only.`;
       if (!g) return;
       const verdict = this.watch.feed(g, Date.now());
       this.onStatus(this.watch.status);
-      if (verdict === "look") this.snap().then(b => b && this.onLook(b, false));
+      if (verdict) this.snap(verdict.box).then(b => b && this.onLook(b, false));
     }
-    /** A sharp still of the whole picture, at most 1600 px wide, as JPEG. */
-    async snap() {
+    /** A sharp still of the part that changed (or the whole picture), at most 1280 px, as JPEG. */
+    async snap(box) {
       const v = this.video;
       if (!v || !v.videoWidth) return null;
-      const scale = Math.min(1, 1600 / Math.max(v.videoWidth, v.videoHeight));
+      const r = cropFor(box, v.videoWidth, v.videoHeight);
+      const scale = Math.min(1, 1280 / Math.max(r.sw, r.sh));
       const c = document.createElement("canvas");
-      c.width = Math.round(v.videoWidth * scale); c.height = Math.round(v.videoHeight * scale);
-      c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+      c.width = Math.round(r.sw * scale); c.height = Math.round(r.sh * scale);
+      c.getContext("2d").drawImage(v, r.sx, r.sy, r.sw, r.sh, 0, 0, c.width, c.height);
       return new Promise(ok => c.toBlob(b => ok(b), "image/jpeg", 0.85));
     }
     async lookNow() {
@@ -1729,7 +1813,7 @@ Reply with the passage only.`;
     }
   }
 
-  const api = { StillnessWatch, LiveEye, changed, W, H };
+  const api = { StillnessWatch, LiveEye, changed, changedBox, cropFor, W, H };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.TMLive = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);
 
@@ -1946,7 +2030,8 @@ Reply with the passage only.`;
       const line = S.queue.shift();
       let u;
       try { u = new SpeechSynthesisUtterance(line.text); } catch (e) { S.lastError = String(e); return; }
-      const v = S.voice();
+      // On iPhone, "automatic" leaves the choice to the voice set in iPhone settings for that language.
+      const v = (PLATFORM === "ios" && !S.voiceURI) ? null : S.voice();
       u.lang = v ? v.lang : LOCALE[S.lang];
       if (v) u.voice = v;
       // the storyteller reads a little slower and lower than the rules lines
@@ -1988,14 +2073,14 @@ Reply with the passage only.`;
   })();
   function voiceStatus() {
     if (!Speech.available) return t("no_speech");
-    const v = Speech.voice();
-    return t("voice_status", { n: Speech.voices().length, voice: v ? v.name : t("voice_auto"), all: Speech.allVoices().length })
+    const v = (PLATFORM === "ios" && !Speech.voiceURI) ? null : Speech.voice();
+    return t("voice_status", { n: Speech.voices().length, voice: v ? v.name : t(PLATFORM === "ios" ? "voice_auto_ios" : "voice_auto"), all: Speech.allVoices().length })
       + (Speech.lastError ? ` (${Speech.lastError})` : "");
   }
   function refreshVoices() {
     Speech.voiceURI = prefs.get("voice." + lang, null);
     const sel = $("#set-voice"); sel.textContent = "";
-    const auto = document.createElement("option"); auto.value = ""; auto.textContent = t("voice_auto"); sel.append(auto);
+    const auto = document.createElement("option"); auto.value = ""; auto.textContent = t(PLATFORM === "ios" ? "voice_auto_ios" : "voice_auto"); sel.append(auto);
     Speech.ranked().forEach(v => {
       const o = document.createElement("option");
       o.value = v.voiceURI; o.textContent = v.name; o.selected = v.voiceURI === Speech.voiceURI; sel.append(o);
@@ -2007,7 +2092,7 @@ Reply with the passage only.`;
     $("#voice-status").textContent = voiceStatus();
     $("#voice-tip").textContent = t("voice_tip_" + PLATFORM);
     const best = Speech.voice();
-    $("#voice-natural").hidden = !best || Speech.isNatural(best);
+    $("#voice-natural").hidden = !best || Speech.isNatural(best) || PLATFORM === "ios";
   }
   function testVoice() {
     Speech.test(t("voice_sample"));
@@ -2392,10 +2477,42 @@ Reply with the passage only.`;
   };
 
   // ---------- the game master looks ---------------------------------------------
+  // Phone photos are 3–5 MB; a 1600 px JPEG reads just as well and travels much faster.
+  async function shrinkImage(file, max = 1600) {
+    try {
+      const bmp = await createImageBitmap(file);
+      const sc = Math.min(1, max / Math.max(bmp.width, bmp.height));
+      if (sc === 1 && file.size < 1.5e6) return file;
+      const c = document.createElement("canvas");
+      c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc);
+      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+      const out = await new Promise(ok => c.toBlob(ok, "image/jpeg", 0.85));
+      return out || file;
+    } catch { return file; }
+  }
+  // The card's rules text comes in a second, slower step. If the card is already in the
+  // game by then, the text is read out on its own.
+  function readText(image, card, onDone) {
+    if (!gm || !gm.readCard) return;
+    gm.readCard(image, card).then(r => {
+      if (r.name_he) card.name_he = r.name_he;
+      if (r.name_ru) card.name_ru = r.name_ru;
+      card.text_he = r.text_he || card.text_he || ""; card.text_ru = r.text_ru || card.text_ru || "";
+      onDone(card);
+    }).catch(() => onDone(null));
+  }
+  function announceCardText(card, seq) {
+    const text = card && (card["text_" + lang] || "");
+    if (!text || !session.events.some(ev => ev.seq === seq)) return;          // nothing to say, or undone meanwhile
+    game.lines.push({ seq, text }); setRulesLine(text);
+    Speech.enqueue({ text, seq, interruptible: false });
+    save();
+  }
   let lookFile = null, lookCtl = null, lookUrl = null;
   async function startLook(file) {
     if (!file) return;
     lookFile = file;
+    const shrunk = shrinkImage(file);
     const dlg = $("#look-dlg");
     if (lookUrl) URL.revokeObjectURL(lookUrl);
     lookUrl = URL.createObjectURL(file); $("#look-img").src = lookUrl;
@@ -2406,9 +2523,12 @@ Reply with the passage only.`;
     if (lookCtl) lookCtl.abort();
     const ctl = new AbortController(); lookCtl = ctl;
     try {
-      const res = await gm.look(file, session.state, lang, ctl.signal);
+      const img = await shrunk;
+      const t0 = Date.now();
+      const res = await gm.look(img, session.state, lang, ctl.signal);
       if (ctl.signal.aborted) return;
-      renderLook(res);
+      res.secs = Math.round((Date.now() - t0) / 100) / 10;
+      renderLook(res, img);
     } catch (e) {
       if (e && e.code === "cancelled") return;
       $("#look-error").textContent = t(gmFailed(e));
@@ -2445,7 +2565,7 @@ Reply with the passage only.`;
     return box;
   }
 
-  function renderLook(res) {
+  function renderLook(res, img) {
     const out = $("#look-result"); out.textContent = ""; out.hidden = false;
     if (res.seen) out.append(el("p", "seen", res.seen));
     if (res.confidence === "low" && res.kind !== "unclear") out.append(el("p", "warn", t("low_confidence")));
@@ -2459,7 +2579,18 @@ Reply with the passage only.`;
       card.append(name);
       if (c["name_" + other]) { const a = el("div", "alt", c["name_" + other]); a.lang = other; card.append(a); }
       const text = c["text_" + lang] || c.text_he || "";
-      if (text) { const tx = el("div", "text", text); tx.lang = c["text_" + lang] ? lang : "he"; card.append(tx); }
+      const tx = el("div", "text", text || t("reading_text")); tx.lang = c["text_" + lang] ? lang : "he";
+      if (!text) tx.classList.add("pending");
+      card.append(tx);
+      let drawnSeq = null;
+      if (!text && img) readText(img, c, done => {
+        if (done && $("#look-dlg").open && tx.isConnected) {
+          const t2 = c["text_" + lang] || c.text_he || "";
+          tx.textContent = t2 || t("text_unreadable"); tx.classList.remove("pending"); tx.lang = c["text_" + lang] ? lang : "he";
+          name.textContent = c["name_" + lang] || c.name_he || c.name_ru;
+        } else if (tx.isConnected) { tx.textContent = t("text_unreadable"); tx.classList.remove("pending"); }
+        if (done && drawnSeq != null) announceCardText(c, drawnSeq);
+      });
       let type = t("type_" + c.card_type);
       if (c.card_type === "enemy" && c.enemy_value != null && c.combat_type) type += ` · ${t(c.combat_type)} ${c.enemy_value}`;
       card.append(el("div", "type", type));
@@ -2469,8 +2600,9 @@ Reply with the passage only.`;
         const who = $("#look-result [name=who]:checked");
         if (!who) return;
         lastActor = who.value;
-        const cues = dispatch("card_drawn", { player_id: who.value, card: c });
+        const cues = dispatch("card_drawn", { player_id: who.value, card: { ...c } });
         if (!cues) return;
+        drawnSeq = session.events.at(-1).seq;
         $("#look-dlg").close();
         const p = session.state.players[who.value];
         if (c.card_type === "enemy" && c.enemy_value != null && !p.downed && !p.eliminated &&
@@ -2557,7 +2689,7 @@ Reply with the passage only.`;
   // Every suggestion still goes through dispatch() — the rules engine decides —
   // and is shown with a short countdown so a wrong reading can be cancelled
   // (and Undo works as always).
-  const LOOK_GAP = 5000, CARD_WAIT = 4500, DIE_WAIT = 3000, SAME_CARD_MS = 3 * 60 * 1000;
+  const LOOK_GAP = 4000, CARD_WAIT = 3000, DIE_WAIT = 2500, SAME_CARD_MS = 3 * 60 * 1000;
 
   function liveStatus(key, vars) {
     const text = key ? t(key, vars) : "";
@@ -2569,7 +2701,13 @@ Reply with the passage only.`;
     if (Live.eye) return;
     Live.eye = new LiveEye({
       onLook: (blob, manual) => liveLook(blob, manual),
-      onStatus: st => { if (!Live.busy) { liveDot(st); liveStatus({ moving: "live_moving", settling: "live_settling", dark: "live_dark" }[st] || (Live.waitUntil > Date.now() ? null : "live_calm")); } },
+      onStatus: st => {
+        if (Live.busy) return;
+        liveDot(st);
+        const wait = Math.ceil((Live.waitUntil - Date.now()) / 1000);
+        if (wait > 0) liveStatus("live_wait", { s: wait });
+        else liveStatus({ moving: "live_moving", settling: "live_settling", dark: "live_dark" }[st] || "live_calm");
+      },
     });
     $("#live").hidden = false; renderLiveWho(); renderGmNote();
     try {
@@ -2594,6 +2732,12 @@ Reply with the passage only.`;
   $("#live-stop").onclick = liveStop;
   $("#live-look").onclick = () => { if (Live.eye) Live.eye.lookNow(); };
 
+  // A small picture of exactly what was sent, so a wrong reading can be understood.
+  let shotUrl = null;
+  function showShot(blob) {
+    const im = $("#live-shot"); if (!im) return;
+    try { if (shotUrl) URL.revokeObjectURL(shotUrl); shotUrl = URL.createObjectURL(blob); im.src = shotUrl; im.hidden = false; } catch { /* no preview */ }
+  }
   function renderLiveWho() {
     const box = $("#live-who"); box.textContent = "";
     if (!session) return;
@@ -2627,13 +2771,17 @@ Reply with the passage only.`;
   }
   async function runLook(blob) {
     Live.busy = true; Live.lastLookAt = Date.now();
-    liveDot("looking"); liveStatus("live_looking");
+    liveDot("looking"); liveStatus("live_looking", { s: 0 });
+    showShot(blob);
+    const t0 = Date.now(), tick = setInterval(() => liveStatus("live_looking", { s: Math.round((Date.now() - t0) / 1000) }), 1000);
     const ctl = new AbortController(); Live.ctl = ctl;
     try {
       const res = await gm.look(blob, session.state, lang, ctl.signal);
+      clearInterval(tick);
       if (ctl.signal.aborted || !Live.eye) return;
-      autoReact(res);
+      autoReact(res, blob);
     } catch (e) {
+      clearInterval(tick);
       if (e && e.code === "cancelled") return;
       if (e && e.code === "rate_limited") {
         const s = e.retryAfter || 30;
@@ -2692,22 +2840,25 @@ Reply with the passage only.`;
     propose(`${c.player.name} ${playerTotal(c)} : ${enemyTotal(c)} ${c.enemy.name}`, resolve, 6000,
       [[t("reroll"), () => { rerollMode = true; renderCombat(); }]]);
   }
-  function autoReact(res) {
+  function autoReact(res, blob) {
     const st = session.state;
     if (res.kind === "card" && res.card) {
-      if (res.confidence === "low") { liveStatus("live_low"); return; }
       const c = res.card, key = cardKey(c);
       if (Live.lastCard && Live.lastCard.key === key && Date.now() - Live.lastCard.at < SAME_CARD_MS) { liveStatus("live_same_card"); return; }
       const pid = Live.turn && st.players[Live.turn] ? Live.turn : defaultActor(), p = st.players[pid];
       const battle = c.card_type === "enemy" && c.enemy_value != null && c.combat_type && canFight(p);
       let text = t("live_card", { card: cardName(c), player: p.name });
       if (battle) text += "\n" + t("live_battle", { player: p.name, enemy: cardName(c), type: t(c.combat_type), value: c.enemy_value });
+      let drawnSeq = null;
       const take = () => {
         Live.lastCard = { key, at: Date.now() };
         lastActor = pid;
-        if (!dispatch("card_drawn", { player_id: pid, card: c })) return false;
+        if (!dispatch("card_drawn", { player_id: pid, card: { ...c } })) return false;
+        drawnSeq = session.events.at(-1).seq;
         return true;
       };
+      // the rules text and its translation arrive a little later; read out once the card is in the game
+      if (blob && !c.text_he && !c.text_ru) readText(blob, c, done => { if (done && drawnSeq != null) announceCardText(c, drawnSeq); });
       const extra = battle ? [[t("live_edit"), () => { if (take()) openCombatForm(session.state.players[pid], { name: cardName(c), value: c.enemy_value, combat_type: c.combat_type }); }]] : [];
       propose(text, () => {
         if (!take() || !battle) return;
@@ -2717,8 +2868,8 @@ Reply with the passage only.`;
         combatArmour = !!g.armour; rerollMode = false; Live.battleDice = [];
         pendingCombatPlayer = session.state.players[pid];
         dispatch("combat_started", { player_id: pid, combat_type: c.combat_type, enemy_name: cardName(c), enemy_value: c.enemy_value, modifiers: mods });
-      }, CARD_WAIT, extra);
-      liveStatus(null);
+      }, res.confidence === "low" ? 0 : CARD_WAIT, extra);      // unsure: wait for a tap instead of a countdown
+      liveStatus(res.confidence === "low" ? "live_low" : null);
       return;
     }
     if (res.kind === "dice" && res.dice.length) {
@@ -2770,7 +2921,7 @@ Reply with the passage only.`;
   $("#set-mute").checked = Speech.muted;
   $("#set-rate").oninput = e => { Speech.rate = Number(e.target.value); prefs.set("rate", Speech.rate); };
   $("#set-mute").onchange = e => { Speech.muted = e.target.checked; if (Speech.muted) Speech.stopAll(); prefs.set("muted", Speech.muted); };
-  $("#set-voice").onchange = e => { Speech.voiceURI = e.target.value; prefs.set("voice." + lang, e.target.value); };
+  $("#set-voice").onchange = e => { Speech.voiceURI = e.target.value || null; prefs.set("voice." + lang, e.target.value || null); testVoice(); };
   $("#btn-test-voice").onclick = testVoice;
   $("#btn-test-voice-2").onclick = testVoice;
   $("#btn-settings").addEventListener("click", refreshVoices);
